@@ -27,9 +27,11 @@ var vlcs = {},
     firstTime = true,
     http = require('http'),
     events = require('events'),
+    retriever = require('subtitle_retriever/lib/retriever'),
     path = require('path'),
     relbase = "/"+path.relative(path.dirname(require.main.filename), __dirname),
-    sleepId;
+    sleepId,
+    cookie;
     
 require('jquery-ui/sortable');
 try{var powerSaveBlocker=require('remote').require('power-save-blocker')}catch(ex){var sleep=require('computer-sleep/sleep')}
@@ -88,6 +90,7 @@ function wjs(context) {
         this.vlc = vlcs[this.context].vlc;
         this.renderer = vlcs[this.context].renderer;
     }
+    this.plugin = this.vlc;
     return this;
 }
 
@@ -238,30 +241,41 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         vlcs[newid].multiscreen = false;
     }
     if (typeof opts[newid].titleBar === 'undefined') opts[newid].titleBar = "fullscreen";
+    opts[newid].curSleepOpt = 0;
     opts[newid].uiHidden = false;
     opts[newid].subDelay = 0;
     opts[newid].lastItem = -1;
     opts[newid].aspectRatio = "Default";
     opts[newid].crop = "Default";
     opts[newid].zoom = 1;
-    if (typeof opts[newid].allowFullscreen === 'undefined') opts[newid].allowFullscreen = true;
+    opts[newid].lastact = new Date().getTime();
+    
+    opts[newid].splashInterval1 = setInterval(function() { logoAnim(); },1000);
+    opts[newid].splashInterval2 = setInterval(function() { logoAnim(); },1600);
+    opts[newid].splashInterval3 = setInterval(function() { logoAnim(); },2700);
 
-    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div></div><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
+    if (typeof opts[newid].allowFullscreen === 'undefined') opts[newid].allowFullscreen = true;
+    
+    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-center wcp-splash-screen" style="overflow: hidden"><div><div style="position: absolute; width: 100%; top: 15px; line-height: 8px; z-index: 10"><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div></div><img class="wcp-img" src="'+relbase+'/images/icon_h.png"><img class="wcp-img-back" src="'+relbase+'/images/icon.png"></div><span class="wcp-opening-text"></span></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul><a class="wcp-add-url" href="#open-url" style="color: #c0c0c0"><div class="wcp-playlist-menu-but">Add URL</div></a><div class="wcp-playlist-menu-but wcp-add-video">Add Video</div><div class="wcp-playlist-menu-but wcp-scan-library">Scan Library</div><div class="wcp-playlist-menu-but wcp-scan-server">Scan Server</div></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul></div><div class="wcp-menu wcp-settings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Player Settings</div><ul class="wcp-menu-items wcp-settings-items"></ul></div><div class="wcp-menu wcp-sleep-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Sleep Timer Settings</div><ul class="wcp-menu-items wcp-sleep-items"></ul></div><div class="wcp-menu wcp-folder-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Manage Folders</div><ul class="wcp-menu-items wcp-folder-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div><div class="wcp-progress-cache"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
     if (!opts[newid].allowFullscreen) playerbody += ' style="cursor: not-allowed; color: rgba(123,123,123,0.6);"';
-    playerbody += '></div><div class="wcp-button wcp-right wcp-playlist-but"></div><div class="wcp-button wcp-right wcp-subtitle-but"></div></div><div class="wcp-status"></div><div class="wcp-notif"></div><div class="wcp-subtitle-text"></div><div class="wcp-tooltip"><div class="wcp-tooltip-arrow"></div><div class="wcp-tooltip-inner">00:00</div></div></div>';
+    playerbody += '></div><div class="wcp-button wcp-right wcp-playlist-but"></div><div class="wcp-button wcp-right wcp-subtitle-but"></div></div><div class="wcp-status"></div><div class="wcp-notif"></div><div class="wcp-subtitle-text"></div><div class="wcp-tooltip"><div class="wcp-tooltip-arrow"></div><div class="wcp-tooltip-inner">00:00</div></div><div class="wcp-settings-but"><i class="wcp-settings-icon"></i></div></div>';
     
     opts[newid].currentSub = 0;
     opts[newid].trackSub = -1;
     
     $(this.context).each(function(ij,el) { if (!$(el).hasClass("webchimeras")) $(el).addClass("webchimeras"); el.innerHTML = playerbody; });
     
+    $(".wcp-subtitle-but").hide(0);
+    $(".wcp-status").hide(0);
+    
     if (vlcs[newid].multiscreen) {
         vlcs[newid].multiscreen = (typeof wcpSettings["multiscreen"] === "undefined") ? false : wcpSettings["multiscreen"];
         $(newid).find(".wcp-toolbar").hide(0);
         $(newid).find(".wcp-tooltip").hide(0);
+        $(newid).find(".wcp-settings-but").hide(0);
         wjs(newid).wrapper.css({cursor: 'pointer'});
     }
-    
+
     wjs(newid).canvas = $(newid)[0].firstChild.firstChild;
 
     // resize video when window is resized
@@ -278,14 +292,41 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             }
         }(newid));
     }
+    
+    wjs(newid).wrapper.find('.wcp-add-url').click(window.openUrlModal);
+    
+    wjs(newid).wrapper.find(".wcp-add-video").click(function() {
+        window.chooseFile('#addPlaylistDialog');
+    });
+    
+    wjs(newid).wrapper.find(".wcp-scan-server").click(function() {
+        window.scanServer();
+    });
+
+    wjs(newid).wrapper.find(".wcp-scan-library").click(function() {
+        window.scanLibrary();
+    });
 
     wjs(newid).wrapper.find(".wcp-menu-close").click(function() {
-        if ($(this).parents(".wcp-wrapper").find(".wcp-playlist").is(":visible")) {
-            $(".wcp-playlist-items").sortable("destroy");
-            $(this).parents(".wcp-wrapper").find(".wcp-playlist").hide(0);
-        } else if ($(this).parents(".wcp-wrapper").find(".wcp-subtitles").is(":visible")) {
-            $(this).parents(".wcp-wrapper").find(".wcp-subtitles").hide(0);
+        wjsPlayer = getContext(this);
+        if (wjsPlayer.find(".wcp-playlist").is(":visible")) {
+            wjsPlayer.find(".wcp-playlist-items").sortable("destroy");
+            wjsPlayer.find(".wcp-playlist").hide(0);
+        } else if (wjsPlayer.find(".wcp-subtitles").is(":visible")) {
+            wjsPlayer.find(".wcp-subtitles").hide(0);
+        } else if (wjsPlayer.find(".wcp-settings-menu").is(":visible")) {
+            wjsPlayer.find(".wcp-settings-menu").hide(0);
+        } else if (wjsPlayer.find(".wcp-sleep-menu").is(":visible")) {
+            wjsPlayer.find(".wcp-sleep-menu").hide(0);
+        } else if (wjsPlayer.find(".wcp-folder-menu").is(":visible")) {
+            wjsPlayer.find(".wcp-folder-menu").hide(0);
         }
+    });
+    
+    wjs(newid).wrapper.find(".wcp-settings-but").mouseenter(function() {
+        $(this).css("opacity","1");
+    }).mouseleave(function() {
+        $(this).css("opacity","0.7");
     });
 
     // toolbar button actions
@@ -293,6 +334,15 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         wjsPlayer = getContext(this);
         vlc = wjsPlayer.vlc;
         buttonClass = this.className.replace("wcp-button","").replace("wcp-left","").replace("wcp-vol-button","").replace("wcp-right","").split(" ").join("");
+
+        if (["wcp-play","wcp-pause","wcp-replay","wcp-prev","wcp-next"].indexOf(buttonClass) > -1 && wjsPlayer.state() == "stopping") {
+            if (window.castData.casting == 1) return;
+            if (!window.castData.casting && window.dlna.initiated) {
+                wjsPlayer.notify("Unavailable");
+                return;
+            }
+        }
+
         if (buttonClass == "wcp-playlist-but") {
             if ($(this).parents(".wcp-wrapper").find(".wcp-playlist").is(":visible")) hidePlaylist.call(wjsPlayer);
             else showPlaylist.call(wjsPlayer);
@@ -314,21 +364,33 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         else if (buttonClass == "wcp-maximize") fullscreenOn.call(wjsPlayer);
     });
     
+    wjs(newid).wrapper.find(".wcp-settings-but").click(function() {
+        wjsPlayer = getContext(this);
+        if (wjsPlayer.find(".wcp-settings-menu").is(":visible")) hideSettings.call(wjsPlayer);
+        else showSettings.call(wjsPlayer);
+    });
     // surface click actions
     wjs(newid).wrapper.find(".wcp-surface").click(function() {
         wjsPlayer = getContext(this);
-        if (wjsPlayer.stateInt() == 6) {
-            wjsPlayer.find(".wcp-replay").trigger("click");
-            return;
+
+        if ((window.localStorage.clickPause == "fullscreen" && wjsPlayer.fullscreen()) || window.localStorage.clickPause == "both") {
+            if (wjsPlayer.state() == "stopping") {
+                if (!window.castData.casting && window.dlna.initiated) return;
+                if (window.castData.casting == 1) return;
+            }
+            if (wjsPlayer.stateInt() == 6) {
+                wjsPlayer.find(".wcp-replay").trigger("click");
+                return;
+            }
+            if ([3,4].indexOf(wjsPlayer.stateInt()) > -1) {
+                if (vlcs[wjsPlayer.context].multiscreen && window.document.webkitFullscreenElement == null) {
+                    wjsPlayer.fullscreen(true);
+                    if (wjsPlayer.wrapper.css('cursor') == 'none') wjsPlayer.wrapper.css({cursor: 'default'});
+                    if (wjsPlayer.mute()) wjsPlayer.mute(false);
+                } else wjsPlayer.togglePause().animatePause();
+            }
+            if ([5].indexOf(wjsPlayer.vlc.state) > -1 && !wjsPlayer.playing() && wjsPlayer.itemCount() > 0) wjsPlayer.play().animatePause();
         }
-        if ([3,4].indexOf(wjsPlayer.stateInt()) > -1) {
-            if (vlcs[wjsPlayer.context].multiscreen && window.document.webkitFullscreenElement == null) {
-                wjsPlayer.fullscreen(true);
-                if (wjsPlayer.wrapper.css('cursor') == 'none') wjsPlayer.wrapper.css({cursor: 'default'});
-                if (wjsPlayer.mute()) wjsPlayer.mute(false);
-            } else wjsPlayer.togglePause().animatePause();
-        }
-        if ([5].indexOf(wjsPlayer.vlc.state) > -1 && !wjsPlayer.playing() && wjsPlayer.itemCount() > 0) wjsPlayer.play().animatePause();
     });
     
     wjs(newid).wrapper.find(".wcp-surface").dblclick(function() {
@@ -349,21 +411,24 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                 clearTimeout(vlcs[wjsPlayer.context].hideUI);
                 wjsPlayer.wrapper.css({cursor: 'default'});
                 
-                if (window.document.webkitFullscreenElement == null) {
-                    if (["both","minimized"].indexOf(opts[wjsPlayer.context].titleBar) > -1) {
-                        wjsPlayer.find(".wcp-titlebar").stop().show(0);
-                        if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
-                        if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
-                    }
-                } else {
-                    if (["both","fullscreen"].indexOf(opts[wjsPlayer.context].titleBar) > -1) {
-                        wjsPlayer.find(".wcp-titlebar").stop().show(0);
-                        if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
-                        if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
+                if (!window.dlna.initiated) {
+                    if (window.document.webkitFullscreenElement == null) {
+                        if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "minimized") {
+                            wjsPlayer.find(".wcp-titlebar").stop().show(0);
+                            if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
+                            if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
+                        }
+                    } else {
+                        if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "fullscreen") {
+                            wjsPlayer.find(".wcp-titlebar").stop().show(0);
+                            if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
+                            if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
+                        }
                     }
                 }
     
                 wjsPlayer.find(".wcp-toolbar").stop().show(0);
+                wjsPlayer.find(".wcp-settings-but").stop().show(0);
                 if (!volDrag && !seekDrag) {
                     if ($(wjsPlayer.find(".wcp-toolbar").selector + ":hover").length > 0) {
                         vlcs[wjsPlayer.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(wjsPlayer.context),3000);
@@ -420,7 +485,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 
     if (fontSize < 16) fontSize = 16;
     else if (fontSize > 31) fontSize = 31;
-
+	
     wjs(newid).wrapper.find(".wcp-status").css('fontSize', fontSize);
     wjs(newid).wrapper.find(".wcp-notif").css('fontSize', fontSize);
     wjs(newid).wrapper.find(".wcp-subtitle-text").css('fontSize', fontSize);
@@ -448,6 +513,17 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     vlcs[newid].vlc.events.on("FrameSetup",function(i) {
         return function(width, height, pixelFormat, videoFrame) {
             vlcs[i].events.emit('FrameSetup', width, height, pixelFormat, videoFrame);
+            
+            splashScreen = players[i].find(".wcp-splash-screen");
+            if (splashScreen.is(":visible")) {
+                if (window.stopPrebuf) window.stopPrebuf = false;
+                splashScreen.hide(0);
+                if (opts[i] && opts[i].splashInterval1) {
+                    clearInterval(opts[i].splashInterval1);
+                    clearInterval(opts[i].splashInterval2);
+                    clearInterval(opts[i].splashInterval3);
+                }
+            }
             singleResize.call(players[i], width, height, pixelFormat, videoFrame);
         }
     }(newid));
@@ -466,7 +542,14 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 
     vlcs[newid].vlc.onMediaChanged = function(i) {
         return function() {
-            isMediaChanged.call(players[i]);
+            wjsPlayer = players[i];
+            isMediaChanged.call(wjsPlayer);
+            if (!wjsPlayer.find(".wcp-splash-screen").is(":visible") && wjsPlayer.itemDesc(wjsPlayer.currentItem()).mrl.indexOf("file:///") == -1) {
+                wjsPlayer.find(".wcp-splash-screen").show(0);
+                opts[i].splashInterval1 = setInterval(function() { logoAnim(); },1000);
+                opts[i].splashInterval2 = setInterval(function() { logoAnim(); },1600);
+                opts[i].splashInterval3 = setInterval(function() { logoAnim(); },2700);
+            }
         }
     }(newid);
     
@@ -509,9 +592,24 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                 vlcs[i].events.emit('StateChanged','playing');
                 vlcs[i].events.emit('StateChangedInt',3);
             }
-            isPlaying.call(players[i]);
+            
+            wjsPlayer = players[i];
+            isPlaying.call(wjsPlayer);
             
             preventSleep();
+            if (wjsPlayer.find(".wcp-splash-screen").is(":visible")) {
+                if (!window.powGlobals.engine) {
+                    wjsPlayer.find(".wcp-splash-screen").hide(0);
+                    if (opts[i].splashInterval1) {
+                        clearInterval(opts[i].splashInterval1);
+                        clearInterval(opts[i].splashInterval2);
+                        clearInterval(opts[i].splashInterval3);
+                    }
+                } else {
+                    window.stopPrebuf = true;
+                    wjsPlayer.setOpeningText("Opening Video");
+                }
+            }
         }
     }(newid);
     
@@ -520,7 +618,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             wjsPlayer = players[i];
             if (length > 0) {
                 if (wjsPlayer.find(".wcp-time-current").text() == "") wjsPlayer.find(".wcp-time-current").text("00:00");
-                wjsPlayer.find(".wcp-time-total").text(" / "+parseTime(length));
+                wjsPlayer.find(".wcp-time-total").text(" / "+wjsPlayer.parseTime(length));
             } else wjsPlayer.find(".wcp-time-total").text("");
         }
     }(newid);
@@ -584,6 +682,21 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     return players[newid];
 }
 
+wjs.prototype.replaceMRL = function(newX,newMRL) {
+    this.addPlaylist(newMRL);
+    
+    newDifference = this.itemCount() -1;
+    swapDifference = this.itemCount() - newX -1;
+    
+    if (newX == this.currentItem()) {
+        this.advanceItem(newDifference,swapDifference*(-1));
+        this.playItem(newX);
+    } else this.advanceItem(newDifference,swapDifference*(-1));
+
+    this.removeItem(newX+1);
+}
+
+// function to add playlist items
 wjs.prototype.addPlaylist = function(playlist) {
      if (this.itemCount() > 0) {
          this.find(".wcp-prev").show(0);
@@ -644,18 +757,26 @@ wjs.prototype.addPlaylist = function(playlist) {
               if (Object.keys(playerSettings).length > 0) this.vlc.playlist.items[this.itemCount()-1].setting = JSON.stringify(playerSettings);
           }
      }
-     if (this.state() == "idle") {
+
+    if (this.state() == "idle") {
         if (opts[this.context].autoplay || opts[this.context].autostart) this.playItem(0);
-        if ((opts[this.context].mute || opts[this.context].multiscreen) && this.vlc.mute === false) players[this.context].mute(true);
-     }
+        if ((opts[this.context].mute || opts[this.context].multiscreen) && !this.mute()) this.mute(true);
+    }
     
     if (this.find(".wcp-playlist").is(":visible")) printPlaylist.call(this);
-    if (this.itemCount() > 1) this.find(".wcp-playlist-but").css({ display: "block" });
+    if (this.itemCount() > 0) this.find(".wcp-playlist-but").css({ display: "block" });
 
     return this;
 }
+// end function to add playlist items
 
+wjs.prototype.refreshPlaylist = function() {
+    if (this.find(".wcp-playlist").is(":visible")) printPlaylist.call(this);
+}
+
+// function to Get Subtitle Description
 wjs.prototype.subDesc = function(getDesc) {
+    // check if it is a number then return description
     if (!isNaN(getDesc)) {
         if (getDesc < this.vlc.subtitles.count) {
             wjsResponse = {};
@@ -663,7 +784,8 @@ wjs.prototype.subDesc = function(getDesc) {
             wjsResponse.type = "internal";
             return wjsResponse;
         } else {
-            var itemSetting = this.itemDesc(this.currentItem()).setting;
+            var itemSetting = {};
+            itemSetting = this.itemDesc(this.currentItem()).setting;
             if (itemSetting.subtitles) {
                 itemSubtitles = itemSetting.subtitles;
                 wjsIndex = this.vlc.subtitles.count;
@@ -686,7 +808,9 @@ wjs.prototype.subDesc = function(getDesc) {
         return;
     } else return console.error("Value sent to .subDesc() needs to be a number.");
 }
+// end function to Get Subtitle Description
 
+// function to Get Subtitle Count
 wjs.prototype.subCount = function() {
     wjsIndex = this.vlc.subtitles.count;
     var itemSetting = this.itemDesc(this.currentItem()).setting;
@@ -698,41 +822,50 @@ wjs.prototype.subCount = function() {
     }
     return wjsIndex;
 }
+// end function to Get Subtitle Count
 
+// function to Get/Set Subtitle Track
 wjs.prototype.subTrack = function(newTrack) {
-    if (typeof newTrack === 'number') {
-        if (newTrack == 0) {
-            this.vlc.subtitles.track = 0;
-            clearSubtitles.call(this);
-        } else {
-            if (newTrack < this.vlc.subtitles.count) {
-                this.find(".wcp-subtitle-text").html("");
-                opts[this.context].subtitles = [];
-                this.vlc.subtitles.track = newTrack;
+    if (["opening","buffering"].indexOf(this.state()) > -1) {
+        opts[this.context].setSub = newTrack;
+        opts[this.context].currentSub = newTrack;
+        printSubtitles.call(this);
+    } else {
+        if (typeof newTrack === 'number') {
+            if (newTrack == 0) {
+                this.vlc.subtitles.track = 0;
+                clearSubtitles.call(this);
             } else {
-                this.find(".wcp-subtitle-text").html("");
-                opts[this.context].subtitles = [];
-                
-                if (this.vlc.subtitles.track > 0) {
-                    this.vlc.subtitles.track = 0;
-                    newSub = newTrack - this.vlc.subtitles.count +1;
-                } else newSub = newTrack - this.vlc.subtitles.count;
-                
-                itemSubtitles = this.itemDesc(this.currentItem()).setting.subtitles;
-                for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
-                    newSub--;
-                    if (newSub == 0) {
-                        loadSubtitle.call(this,itemSubtitles[k]);
-                        break;
+                if (newTrack < this.vlc.subtitles.count) {
+                    this.find(".wcp-subtitle-text").html("");
+                    opts[this.context].subtitles = [];
+                    this.vlc.subtitles.track = newTrack;
+                } else {
+                    this.find(".wcp-subtitle-text").html("");
+                    opts[this.context].subtitles = [];
+                    
+                    if (this.vlc.subtitles.track > 0) {
+                        this.vlc.subtitles.track = 0;
+                        newSub = newTrack - this.vlc.subtitles.count +1;
+                    } else newSub = newTrack - this.vlc.subtitles.count;
+                    
+                    itemSubtitles = this.itemDesc(this.currentItem()).setting.subtitles;
+                    for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
+                        newSub--;
+                        if (newSub == 0) {
+                            loadSubtitle.call(this,itemSubtitles[k]);
+                            break;
+                        }
                     }
                 }
+                opts[this.context].currentSub = newTrack;
+                printSubtitles.call(this);
             }
-            opts[this.context].currentSub = newTrack;
-            printSubtitles.call(this);
-        }
-    } else return opts[this.context].currentSub;
+        } else return opts[this.context].currentSub;
+    }
     return this;
 }
+// end function to Get/Set Subtitle Track
 
 wjs.prototype.subDelay = function(newDelay) {
     if (typeof newDelay === 'number') {
@@ -806,6 +939,7 @@ wjs.prototype.volume = function(newVolume) {
     if (typeof newVolume !== 'undefined' && !isNaN(newVolume) && newVolume >= 0 && newVolume <= 5) {
         opts[this.context].lastVolume = this.vlc.volume;
         this.vlc.volume = 0;
+        vlcs[this.context].events.emit('VolumeChanged',0);
         if (!this.vlc.mute) {
             this.find(".wcp-vol-button").removeClass("wcp-volume-medium").removeClass("wcp-volume-high").removeClass("wcp-volume-low").addClass("wcp-mute");
             this.vlc.mute = true;
@@ -820,6 +954,7 @@ wjs.prototype.volume = function(newVolume) {
 
         this.find(".wcp-vol-bar-full").css("width", (((newVolume/200)*parseInt(this.find(".wcp-vol-bar").css("width")))-parseInt(this.find(".wcp-vol-bar-pointer").css("width")))+"px");
         this.vlc.volume = parseInt(newVolume);
+        vlcs[this.context].events.emit('VolumeChanged',parseInt(newVolume));
     } else return this.vlc.volume;
     return this;
 }
@@ -827,7 +962,7 @@ wjs.prototype.volume = function(newVolume) {
 wjs.prototype.time = function(newTime) {
     if (typeof newTime === 'number') {
         this.vlc.time = newTime;
-        this.find(".wcp-time-current").text(parseTime(newTime,this.vlc.length));
+        this.find(".wcp-time-current").text(this.parseTime(newTime,this.vlc.length));
         this.find(".wcp-progress-seen")[0].style.width = (newTime/(this.vlc.length)*100)+"%";
     } else return this.vlc.time;
     return this;
@@ -836,7 +971,7 @@ wjs.prototype.time = function(newTime) {
 wjs.prototype.position = function(newPosition) {
     if (typeof newPosition === 'number') {
         this.vlc.position = newPosition;
-        this.find(".wcp-time-current").text(parseTime(this.vlc.length*newPosition,this.vlc.length));
+        this.find(".wcp-time-current").text(this.parseTime(this.vlc.length*newPosition,this.vlc.length));
         this.find(".wcp-progress-seen")[0].style.width = (newPosition*100)+"%";
     } else return this.vlc.position;
     return this;
@@ -945,7 +1080,7 @@ wjs.prototype.removeItem = function(remItem) {
          } else this.vlc.playlist.removeItem(remItem);
         if (this.find(".wcp-playlist").is(":visible")) printPlaylist.call(this);
         // hide playlist button if less then 2 playlist items
-        if (this.itemCount() < 2) this.find(".wcp-playlist-but").css({ display: "none" });
+        if (this.itemCount() < 1) this.find(".wcp-playlist-but").css({ display: "none" });
     } else return false;
     return this;
 }
@@ -960,38 +1095,74 @@ wjs.prototype.clearPlaylist = function() {
 }
 
 function progressHoverIn(e) {
-    if (this.vlc.length) {
-        var rect = this.wrapper[0].getBoundingClientRect();
-        if (e.pageX >= rect.left && e.pageX <= rect.right) {
-            var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
-            if (newtime > 0) {
-                this.find(".wcp-tooltip-inner").text(parseTime(newtime));
-                var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                    this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
-                this.find(".wcp-tooltip").show(0);
-            }
-        } else this.find(".wcp-tooltip").hide(0);
+    if (!window.dlna.initiated) {
+        if (this.vlc.length) {
+            var rect = this.wrapper[0].getBoundingClientRect();
+            if (e.pageX >= rect.left && e.pageX <= rect.right) {
+                var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
+                if (newtime > 0) {
+                    this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
+                    var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
+                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
+                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+                    this.find(".wcp-tooltip").show(0);
+                }
+            } else this.find(".wcp-tooltip").hide(0);
+        }
+    } else {
+        if (window.castData.castLength) {
+            var rect = this.wrapper[0].getBoundingClientRect();
+            if (e.pageX >= rect.left && e.pageX <= rect.right) {
+                var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+                if (newtime > 0) {
+                    this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
+                    var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
+                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
+                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+                    this.find(".wcp-tooltip").show(0);
+                }
+            } else this.find(".wcp-tooltip").hide(0);
+        }
     }
 }
 
 function progressMouseMoved(e) {
-    if (this.vlc.length) {
-        var rect = this.wrapper[0].getBoundingClientRect();
-        if (e.pageX >= rect.left && e.pageX <= rect.right) {
-            var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
-            if (newtime > 0) {
-                this.find(".wcp-tooltip-inner").text(parseTime(newtime));
-                var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                    this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
-                this.find(".wcp-tooltip").show(0);
-            }
-        } else this.find(".wcp-tooltip").hide(0);
+    if (!window.dlna.initiated) {
+        if (this.vlc.length) {
+            var rect = this.wrapper[0].getBoundingClientRect();
+            if (e.pageX >= rect.left && e.pageX <= rect.right) {
+                var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
+                if (newtime > 0) {
+                    this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
+                    var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
+                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
+                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+                    this.find(".wcp-tooltip").show(0);
+                }
+            } else this.find(".wcp-tooltip").hide(0);
+        }
+    } else {
+        if (window.castData.castLength) {
+            var rect = this.wrapper[0].getBoundingClientRect();
+            if (e.pageX >= rect.left && e.pageX <= rect.right) {
+                var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+                if (newtime > 0) {
+                    this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
+                    var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
+                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
+                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+                    this.find(".wcp-tooltip").show(0);
+                }
+            } else this.find(".wcp-tooltip").hide(0);
+        }
     }
 }
 
@@ -1010,10 +1181,15 @@ function seekDragEnded(e,wjsMulti) {
     if (wjsLogic) {
         p = (e.pageX - rect.left) / (rect.right - rect.left);
         this.find(".wcp-progress-seen").css("width", (p*100)+"%");
-        this.vlc.position = p;
         this.find(".wcp-time-current").text(this.find(".wcp-tooltip-inner").text());
-    }
 
+        if (!window.dlna.initiated) this.vlc.position = p;
+        else if (window.castData.casting && window.castData.castLength) {
+            window.dlna.controls.seek(parseInt((window.castData.castLength /1000) *p));
+            window.castData.castingPaused = 0;
+            this.setOpeningText("Updating playback position ...");
+        }
+    }
 }
 
 function volDragEnded(e,wjsMulti) {
@@ -1041,13 +1217,12 @@ function volDragEnded(e,wjsMulti) {
         }
         this.volume(Math.floor(200* p)+5);
     }
-
 }
 
 function mouseClickEnd(e) {
     clearInterval(vlcs[this.context].hideUI);
-    this.wrapper.css({cursor: 'default'});
-    
+    if (this.wrapper.css('cursor') == 'none') this.wrapper.css({cursor: 'default'});
+
     vlcs[this.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(this.context),3000);
     if (seekDrag) {
         seekDrag = false;
@@ -1072,9 +1247,13 @@ function seekDragMoved(e,wjsMulti) {
         p = (e.pageX - rect.left) / (rect.right - rect.left);
         this.find(".wcp-progress-seen").css("width", (p*100)+"%");
         vlc = this.vlc;
-        var newtime = Math.floor(vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
+        if (window.dlna.initiated && window.castData.casting && window.castData.castLength) {
+            var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+        } else {
+            var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
+        }
         if (newtime > 0) {
-            this.find(".wcp-tooltip-inner").text(parseTime(newtime));
+            this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
             var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
             if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
                 this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
@@ -1111,11 +1290,13 @@ function mouseMoved(e) {
     }
 }
 
-wjs.prototype.catchEvent = function(wjsEvent,wjsFunction) {
+// catch event function
+wjs.prototype.catchEvent = function(wjs_event,wjsFunction) {
     var saveContext = this;
-    this.vlc.events.on(wjsEvent, function(event) { return wjsFunction.call(saveContext,event); } );
+    this.vlc.events.on(wjs_event, function(event) { return wjsFunction.call(saveContext,event); } );
     return this;
 }
+// end catch event function
 
 wjs.prototype.video = function(newBool) {
     if (typeof newBool !== 'undefined') {
@@ -1156,8 +1337,9 @@ wjs.prototype.ui = function(newBool) {
         if (newBool === true) {
             if (opts[this.context].uiHidden) {
                 opts[this.context].uiHidden = false;
-                this.find(".wcp-titlebar").stop().show(0);
+                if (!window.dlna.initiated) this.find(".wcp-titlebar").stop().show(0);
                 this.find(".wcp-toolbar").stop().show(0);
+                this.find(".wcp-settings-but").stop().show(0);
                 if (this.wrapper.css('cursor') == 'none') this.wrapper.css({cursor: 'default'});
                 return true;
             } else return false;
@@ -1167,6 +1349,7 @@ wjs.prototype.ui = function(newBool) {
                 this.find(".wcp-titlebar").stop().hide(0);
                 this.find(".wcp-toolbar").stop().hide(0);
                 this.find(".wcp-tooltip").stop().hide(0);
+                this.find(".wcp-settings-but").stop().hide(0);
                 if (this.wrapper.css('cursor') == 'none') this.wrapper.css({cursor: 'default'});
                 return true;
             } else return false;
@@ -1175,7 +1358,10 @@ wjs.prototype.ui = function(newBool) {
 }
 
 wjs.prototype.notify = function(newMessage) {
-    this.find(".wcp-notif").text(newMessage);
+    if (!this.fullscreen() && this.find(".wcp-settings-but").is(":visible")) {
+        this.find(".wcp-notif").css("right","46px");
+    } else this.find(".wcp-notif").css("right","15px");
+    this.find(".wcp-notif").html(newMessage);
     this.find(".wcp-notif").stop().show(0);
     if (opts[this.context].notifTimer) clearTimeout(opts[this.context].notifTimer);
     wjsPlayer = this;
@@ -1197,12 +1383,49 @@ wjs.prototype.fullscreen = function(newBool) {
     }
 }
 
+
 wjs.prototype.animatePause = function() {
     this.find(".wcp-anim-basic").css("fontSize", "50px");
     this.find(".wcp-anim-basic").css("padding", "7px 27px");
     this.find(".wcp-anim-basic").css("borderRadius", "12px");
     this.find(".wcp-pause-anim").fadeIn(200).fadeOut(200);
     this.find(".wcp-anim-basic").animate({ fontSize: "80px", padding: "7px 30px" },400);
+}
+
+wjs.prototype.parseTime = function(t,total) {
+    if (typeof total === 'undefined') total = t;
+    var tempHour = ("0" + Math.floor(t / 3600000)).slice(-2);
+    var tempMinute = ("0" + (Math.floor(t / 60000) %60)).slice(-2);
+    var tempSecond = ("0" + (Math.floor(t / 1000) %60)).slice(-2);
+    if (total >= 3600000) return tempHour + ":" + tempMinute + ":" + tempSecond;
+    else return tempMinute + ":" + tempSecond;
+}
+
+wjs.prototype.showSplashScreen = function() {
+    if (!this.find(".wcp-splash-screen").is(":visible") && this.itemDesc(this.currentItem()).mrl.indexOf("file:///") == -1) {
+        this.find(".wcp-splash-screen").show(0);
+        if (opts[this.context].splashInterval1) {
+            clearInterval(opts[this.context].splashInterval1);
+            clearInterval(opts[this.context].splashInterval2);
+            clearInterval(opts[this.context].splashInterval3);
+        }
+        resetLogo();
+        opts[this.context].splashInterval1 = setInterval(function() { logoAnim(); },1000);
+        opts[this.context].splashInterval2 = setInterval(function() { logoAnim(); },1600);
+        opts[this.context].splashInterval3 = setInterval(function() { logoAnim(); },2700);
+    }
+}
+
+wjs.prototype.hideSplashScreen = function() {
+    if (this.find(".wcp-splash-screen").is(":visible")) {
+        this.find(".wcp-splash-screen").hide(0);
+        if (opts[this.context].splashInterval1) {
+            clearInterval(opts[this.context].splashInterval1);
+            clearInterval(opts[this.context].splashInterval2);
+            clearInterval(opts[this.context].splashInterval3);
+        }
+        resetLogo();
+    }
 }
 
 function fullscreenOn() {
@@ -1215,19 +1438,19 @@ function fullscreenOn() {
             if (this.find(".wcp-status").css("top") == "10px") this.find(".wcp-status").css("top", "35px");
             if (this.find(".wcp-notif").css("top") == "10px") this.find(".wcp-notif").css("top", "35px");
         }
+        this.find(".wcp-settings-but").addClass("wcp-settings-but-mini");
         wcpWrapper = this.wrapper[0];
         if (wcpWrapper.webkitRequestFullscreen) wcpWrapper.webkitRequestFullscreen();
         else if (wcpWrapper.requestFullscreen) wcpWrapper.requestFullscreen();
         
         switchClass(this.find(".wcp-maximize"),"wcp-maximize","wcp-minimize");
-        
         return true;
     } else return false;
 }
 
 function fullscreenOff() {
     if (window.document.webkitFullscreenElement != null) {
-        if (["none","fullscreen"].indexOf(opts[this.context].titleBar) > -1) {
+        if (opts[this.context].titleBar == "none" || opts[this.context].titleBar == "fullscreen") {
             this.find(".wcp-titlebar").hide(0);
             if (this.find(".wcp-status").css("top") == "35px") this.find(".wcp-status").css("top", "10px");
             if (this.find(".wcp-notif").css("top") == "35px") this.find(".wcp-notif").css("top", "10px");
@@ -1235,16 +1458,18 @@ function fullscreenOff() {
             if (this.find(".wcp-status").css("top") == "10px") this.find(".wcp-status").css("top", "35px");
             if (this.find(".wcp-notif").css("top") == "10px") this.find(".wcp-notif").css("top", "35px");
         }
-        
+
+        this.find(".wcp-settings-but").removeClass("wcp-settings-but-mini");
+
         if (window.document.webkitCancelFullScreen) window.document.webkitCancelFullScreen();
         else if (window.document.cancelFullScreen) window.document.cancelFullScreen();
 
         switchClass(this.find(".wcp-minimize"),"wcp-minimize","wcp-maximize");
-        
         if (vlcs[this.context].multiscreen) {
             this.find(".wcp-titlebar").hide(0);
             this.find(".wcp-toolbar").hide(0);
             this.find(".wcp-tooltip").hide(0);
+            this.find(".wcp-settings-but").hide(0);
             this.wrapper.css({cursor: 'pointer'});
             if (!this.vlc.mute) this.vlc.mute = true;
         }
@@ -1254,7 +1479,7 @@ function fullscreenOff() {
 
 // player event handlers
 function timePassed(t) {
-    if (t > 0) this.find(".wcp-time-current").text(parseTime(t,this.vlc.length));
+    if (t > 0) this.find(".wcp-time-current").text(this.parseTime(t,this.vlc.length));
     else if (this.find(".wcp-time-current").text() != "") this.find(".wcp-time-current").text("");
     
     if (typeof opts[this.context].subtitles === 'undefined') opts[this.context].subtitles = [];
@@ -1303,7 +1528,6 @@ function isOpening() {
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
     if (style.display === 'none') this.find(".wcp-status").show();
-    this.find(".wcp-status").text("Opening");
 }
 
 function isMediaChanged() {
@@ -1314,21 +1538,34 @@ function isMediaChanged() {
     if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
     this.find(".wcp-subtitle-but").hide(0);
     
+    if (window.win.title != this.itemDesc(this.currentItem()).title) {
+        window.win.title = this.itemDesc(this.currentItem()).title;
+    }
+    
     opts[this.context].firstTime = true;
 }
 
 function isBuffering(percent) {
-    this.find(".wcp-status").text("Buffering "+percent+"%");
-    this.find(".wcp-status").stop().show(0);
-    if (percent == 100) this.find(".wcp-status").fadeOut(1200);
+    if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
+        if (this.itemDesc(this.currentItem()).mrl.indexOf("file:///") == -1) {
+            this.find(".wcp-status").text("Buffering "+percent+"%");
+            if (!this.find(".wcp-splash-screen").is(":visible")) {
+                this.find(".wcp-status").stop().show(0);
+                if (percent == 100) this.find(".wcp-status").fadeOut(1200);
+            } else if (percent > 0) this.setOpeningText("Buffering "+percent+"%");
+            else this.find(".wcp-status").stop().hide(0);
+        }
+    }
+    opts[this.context].lastact = new Date().getTime();
 }
 
 function isPlaying() {
     if (opts[this.context].keepHidden) {
         opts[this.context].keepHidden = false;
         itemSetting = this.itemDesc(this.currentItem()).setting;
-        if (itemSetting.zoom) opts[this.context].zoom = itemSetting.zoom;
-        else {
+        if (itemSetting.zoom) {
+            opts[this.context].zoom = itemSetting.zoom;
+        } else {
             opts[this.context].zoom = 1;
             autoResize();
         }
@@ -1338,6 +1575,9 @@ function isPlaying() {
             this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
         }
         opts[this.context].firstTime = false;
+        
+        this.hideSplashScreen();
+        
         if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
         opts[this.context].currentSub = 0;
         opts[this.context].trackSub = -1;
@@ -1370,6 +1610,11 @@ function isPlaying() {
         opts[this.context].subDelay = 0;
         
         if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
+        
+        if (opts[this.context].setSub) {
+            this.subTrack(opts[this.context].setSub);
+            delete opts[this.context].setSub;
+        }
         
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
@@ -1491,6 +1736,7 @@ function hideUI() {
         }
         this.find(".wcp-toolbar").stop().fadeOut();
         this.find(".wcp-tooltip").stop().fadeOut();
+        this.find(".wcp-settings-but").stop().fadeOut();
         this.wrapper.css({cursor: 'none'});
     }
 }
@@ -1498,6 +1744,9 @@ function hideUI() {
 function showPlaylist() {
     if (!this.find(".wcp-playlist").is(":visible")) {
         if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
+        else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+        else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
+        else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
         this.find(".wcp-playlist").show(0);
         printPlaylist.call(this);
     }
@@ -1509,13 +1758,46 @@ function hidePlaylist() {
         this.find(".wcp-playlist").hide(0);
     }
 }
+    
+function showSleepMenu() {
+    if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+    if (!this.find(".wcp-sleep-menu").is(":visible")) {
+        this.find(".wcp-sleep-menu").show(0);
+        printSleepMenu.call(this);
+    }
+}
+
+function showFolderMenu() {
+    if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+    if (!this.find(".wcp-folder-menu").is(":visible")) {
+        this.find(".wcp-folder-menu").show(0);
+        printFolderMenu.call(this);
+    }
+}
+
+function showSettings() {
+    if (this.find(".wcp-playlist").is(":visible")) this.find(".wcp-playlist").hide(0);
+    else if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
+    else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
+    else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+    if (!this.find(".wcp-settings-menu").is(":visible")) {
+        this.find(".wcp-settings-menu").show(0);
+        printSettings.call(this);
+    }
+}
+
+function hideSettings() {
+    if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+}
 
 function showSubtitles() {
     if (!this.find(".wcp-subtitles").is(":visible")) {
         if (this.find(".wcp-playlist").is(":visible")) {
             this.find(".wcp-playlist-items").sortable("destroy");
             this.find(".wcp-playlist").hide(0);
-        }
+        } else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+        else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
+        else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
         this.find(".wcp-subtitles").show(0);
         printSubtitles.call(this);
     }
@@ -1528,7 +1810,7 @@ function printPlaylist() {
         generatePlaylist = "";
         for (oi = 0; oi < this.itemCount(); oi++) {
             if (this.vlc.playlist.items[oi].title.indexOf("[custom]") != 0) {
-                var plstring = this.itemDesc(oi).title;
+                var plstring = this.vlc.playlist.items[oi].title;
                 if (plstring.indexOf("http://") == 0) {
                     // extract filename from url
                     var tempPlstring = plstring.substring(plstring.lastIndexOf('/')+1);
@@ -1551,12 +1833,19 @@ function printPlaylist() {
                 // capitalize first letter
                 plstring = plstring.charAt(0).toUpperCase() + plstring.slice(1);
     
-                if (plstring != this.itemDesc(oi).title) this.vlc.playlist.items[oi].title = "[custom]"+plstring;
+                if (plstring != this.itemDesc(oi).title) vlc.playlist.items[oi].title = "[custom]"+plstring;
             }
             generatePlaylist += '<li class="wcp-menu-item wcp-playlist-item';
-            if (oi == this.currentItem()) generatePlaylist += ' wcp-menu-selected';
+            if (window.tempSel > -1) {
+                if (oi == window.tempSel) generatePlaylist += ' wcp-menu-selected';
+            } else if (window.dlna.initiated) {
+                if (oi == window.dlna.lastIndex) generatePlaylist += ' wcp-menu-selected';
+            } else {
+                if (!window.waitForNext && oi == this.currentItem()) generatePlaylist += ' wcp-menu-selected';
+                else if (window.waitForNext && oi == window.tempSel) generatePlaylist += ' wcp-menu-selected';
+            }
             if (this.itemDesc(oi).disabled) generatePlaylist += ' wcp-disabled';
-            generatePlaylist += '"><img class="wcp-disabler-img" src="'+relbase+'/images/dragger.png"><div class="wcp-disabler-hold"><div class="wcp-disabler"><div class="wcp-disabler-dot"></div></div></div>'+this.itemDesc(oi).title+'</li>';
+            generatePlaylist += '"><img class="wcp-disabler-img" src="'+relbase+'/images/dragger.png" width="6" height="30"><div class="wcp-disabler-hold"><div class="wcp-disabler"><div class="wcp-disabler-dot"></div></div></div>'+this.itemDesc(oi).title+'</li>';
         }
         playlistItems.css('overflowY', 'scroll');
         playlistItems.html("");
@@ -1565,7 +1854,7 @@ function printPlaylist() {
         if (playlistItems.outerHeight() < (oi* parseInt(playlistItems.find(".wcp-playlist-item").css("height")))) {
             playlistItems.css("cursor","pointer");
         } else playlistItems.css("cursor","default");
-        
+
         this.find(".wcp-disabler-hold").click(function(e) {
             if (!e) var e = window.event;
             e.cancelBubble = true;
@@ -1584,13 +1873,20 @@ function printPlaylist() {
         });
         this.find(".wcp-playlist-item").click(function() {
             if (!$(this).hasClass("wcp-menu-selected")) {
+                if (window.waitForNext) window.waitForNext = false;
                 wjsPlayer = getContext(this);
-                if (wjsPlayer.itemDesc($(this).index()).disabled) {
+                if (wjsPlayer.itemDesc(plItem.index()).disabled) {
                     wjsPlayer.vlc.playlist.items[$(this).index()].disabled = false;
                     $(this).removeClass("wcp-disabled");
                 }
+                if (window.dlna.initiated) {
+                    window.dlna.lastIndex = $(this).index();
+                    window.dlnaPlay($(this).index());
+                    printPlaylist.call(wjsPlayer);
+                    return;
+                }
 
-                wjsPlayer.playItem($(this).index());
+                wjsPlayer.playItem(parseInt($(this).index()));
                 printPlaylist.call(wjsPlayer);
             }
         });
@@ -1608,7 +1904,29 @@ function printPlaylist() {
           update: function(e,ui) {
               var start_pos = ui.item.data('start_pos');
               var end_pos = ui.item.index();
-              getContext(this).advanceItem(start_pos,(end_pos - start_pos));
+              var swapItems = [];
+              swapItems[0] = start_pos;
+              swapItems[1] = (end_pos - start_pos);
+              getContext(this).advanceItem(swapItems[0],swapItems[1]);
+              if (swapItems[1] < 0) {
+                  var tmpVideos = [];
+                  window.powGlobals.videos.forEach(function(el,ij) {
+                      if (ij == (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.videos[swapItems[0]];
+                      else if (ij > (swapItems[0] + swapItems[1]) && ij <= swapItems[0]) tmpVideos[ij] = window.powGlobals.videos[ij-1];
+                      else tmpVideos[ij] = el;
+                  });
+                  setTimeout(function() { window.powGlobals.currentIndex = window.player.currentItem(); },10);
+                  window.powGlobals.videos = tmpVideos;
+              } else if (swapItems[1] > 0) {
+                  var tmpVideos = [];
+                  window.powGlobals.videos.forEach(function(el,ij) {
+                      if (ij == swapItems[0] + swapItems[1]) tmpVideos[ij] = window.powGlobals.videos[swapItems[0]];
+                      else if (ij >= swapItems[0] && ij < (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.videos[ij+1];
+                      else tmpVideos[ij] = el;
+                  });
+                  setTimeout(function() { window.powGlobals.currentIndex = window.player.currentItem(); },10);
+                  window.powGlobals.videos = tmpVideos;
+              }
           }
         });
     } else playlistItems.html("");
@@ -1632,8 +1950,8 @@ function printSubtitles() {
     itemSetting = this.itemDesc(this.currentItem()).setting;
     
     if (itemSetting.subtitles) {
-        itemSubtitles = itemSetting.subtitles;
-        for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
+        target = itemSetting.subtitles;
+        for (var k in target) if (target.hasOwnProperty(k)) {
             generatePlaylist += '<li class="wcp-menu-item wcp-subtitles-item';
             if (oi == opts[this.context].currentSub) generatePlaylist += ' wcp-menu-selected';
             generatePlaylist += '">'+k+'</li>';
@@ -1647,13 +1965,14 @@ function printSubtitles() {
     if (playlistItems.outerHeight() < (oi* parseInt(playlistItems.find(".wcp-subtitles-item").css("height")))) {
         playlistItems.css("cursor","pointer");
     } else playlistItems.css("cursor","default");
-        
+    
     this.find(".wcp-subtitles-item").click(function() {
         wjsPlayer = getContext(this);
         if ($(this).index() == 0) {
             wjsPlayer.vlc.subtitles.track = 0;
             clearSubtitles.call(wjsPlayer);
             wjsPlayer.notify("Subtitle Unloaded");
+            window.localStorage.subLang = "None";
         } else if ($(this).index() < wjsPlayer.vlc.subtitles.count) {
             wjsPlayer.find(".wcp-subtitle-text").html("");
             opts[wjsPlayer.context].subtitles = [];
@@ -1667,9 +1986,11 @@ function printSubtitles() {
             itemSubtitles = itemSetting.subtitles;
             for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
                 newSub--;
-                if (newSub == 0) {
+                if (newSub < 2) {
                     loadSubtitle.call(wjsPlayer,itemSubtitles[k]);
                     wjsPlayer.notify("Subtitle: "+k);
+                    if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
+                    else window.localStorage.subLang = k;
                     break;
                 }
             }
@@ -1678,7 +1999,151 @@ function printSubtitles() {
         opts[wjsPlayer.context].currentSub = $(this).index();
         opts[wjsPlayer.context].subDelay = 0;
     });
+}
+
+function printSleepMenu() {
+    wjsPlayer = this;
+    settingsItems = this.find(".wcp-sleep-items");
+
+    generatePlaylist = "";
+    oi = 0;
+    sleepOpts = ['Disabled','15 min','30 min','45 min','1 hour','1 hour 30 min','2 hours'];
+    sleepOpts.forEach(function(el,ij) {
+        generatePlaylist += '<li class="wcp-menu-item wcp-sleep-item';
+        if (opts[wjsPlayer.context].curSleepOpt == ij) generatePlaylist += ' wcp-menu-selected';
+        generatePlaylist += '">'+el+'</li>';
+        oi++;
+    });
+
+    settingsItems.html("");
+    settingsItems.html(generatePlaylist);
     
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-sleep-item").css("height")))) {
+        settingsItems.css("cursor","pointer");
+    } else settingsItems.css("cursor","default");
+    
+    wjsPlayer.find(".wcp-sleep-item").click(function() {
+        if ($(this).text() == "Disabled") sleepTime = 0;
+        else if ($(this).text() == "15 min") sleepTime = 900000;
+        else if ($(this).text() == "30 min") sleepTime = 1800000;
+        else if ($(this).text() == "45 min") sleepTime = 2700000;
+        else if ($(this).text() == "1 hour") sleepTime = 3600000;
+        else if ($(this).text() == "1 hour 30 min") sleepTime = 5400000;
+        else if ($(this).text() == "2 hours") sleepTime = 7200000;
+        
+        wjsPlayer = getContext(this);
+
+        opts[wjsPlayer.context].curSleepOpt = $(this).index();
+        if (opts[wjsPlayer.context].sleepTimer) clearTimeout(opts[wjsPlayer.context].sleepTimer);
+        if (sleepTime > 0) {
+            opts[wjsPlayer.context].sleepTimer = setTimeout(function() {
+                if (wjsPlayer.playing()) wjsPlayer.togglePause();
+                if (window.powGlobals.engine) {
+                    if (window.wjs().fullscreen()) window.wjs().fullscreen(false);
+                    $("#filesList").css("min-height",$("#player_wrapper").height());
+                    $("html, body").animate({ scrollTop: $("#player_wrapper").height() }, "slow");
+                    $("body").css("overflow-y","visible");
+                }
+            },sleepTime);
+        }
+        wjsPlayer.find(".wcp-sleep-menu").hide(0);
+        wjsPlayer.notify("Sleep Timer: "+$(this).text());
+    });
+}
+
+function printFolderMenu() {
+    wjsPlayer = this;
+    settingsItems = wjsPlayer.find(".wcp-folder-items");
+
+    generatePlaylist = "";
+    oi = 3;
+    generatePlaylist += '<li class="wcp-menu-item wcp-folder-item set-download-folder">Download Folder</li>';
+    generatePlaylist += '<li class="wcp-menu-item wcp-folder-item set-library-folder">Library Folder</li>';
+    generatePlaylist += '<li class="wcp-menu-item wcp-folder-item back-to-settings">Back to Settings</li>';
+
+    settingsItems.html("");
+    settingsItems.html(generatePlaylist);
+    
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-folder-item").css("height")))) {
+        settingsItems.css("cursor","pointer");
+    } else settingsItems.css("cursor","default");
+    
+    wjsPlayer.find(".set-download-folder").click(function() {
+        if (wjsPlayer.fullscreen()) wjsPlayer.toggleFullscreen();
+        window.chooseFile('#folderDialog');
+    });
+    wjsPlayer.find(".set-library-folder").click(function() {
+        if (wjsPlayer.fullscreen()) wjsPlayer.toggleFullscreen();
+        window.chooseFile('#libraryDialog');
+    });
+    wjsPlayer.find(".back-to-settings").click(function() {
+        showSettings.call(wjsPlayer);
+    });
+}
+
+function printSettings() {
+    wjsPlayer = this;
+    settingsItems = wjsPlayer.find(".wcp-settings-items");
+
+    generatePlaylist = "";
+    oi = 5;
+    if (window.dlna.initiated) generatePlaylist += '<li class="wcp-menu-item wcp-settings-item dlna-off">Stop Streaming to TV</li>';
+    else generatePlaylist += '<li class="wcp-menu-item wcp-settings-item dlna-on">Stream to TV (DLNA)</li>';
+    if (window.powGlobals.engine) {
+        generatePlaylist += '<li class="wcp-menu-item wcp-settings-item torrent-data-set">View Torrent Data</li>';
+        oi++;
+    }
+    generatePlaylist += '<li class="wcp-menu-item wcp-settings-item set-sleep-timer">Set Sleep Timer</li>';
+    generatePlaylist += '<li class="wcp-menu-item wcp-settings-item manage-folders">Manage Folders</li>';
+    generatePlaylist += '<li class="wcp-menu-item wcp-settings-item back-to-main-set">Back to Main Menu</li>';
+    generatePlaylist += '<li class="wcp-menu-item wcp-settings-item close-powder-set">Close Powder</li>';
+
+    settingsItems.html("");
+    settingsItems.html(generatePlaylist);
+    
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-settings-item").css("height")))) {
+        settingsItems.css("cursor","pointer");
+    } else settingsItems.css("cursor","default");
+    
+    wjsPlayer.find(".dlna-on").click(function() {
+        wjsPlayer = getContext(this);
+        $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
+        window.findDlnaClient();
+        var wjsContext = wjsPlayer.context;
+        opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
+        opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
+        opts[wjsContext].splashInterval3 = setInterval(function() { logoAnim(); },2700);
+    });
+    wjsPlayer.find(".dlna-off").click(function() {
+        wjsPlayer = getContext(this);
+        $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
+        var wjsContext = wjsPlayer.context;
+        if (opts[wjsContext].splashInterval1) {
+            resetLogo();
+            clearInterval(opts[wjsContext].splashInterval1);
+            clearInterval(opts[wjsContext].splashInterval2);
+            clearInterval(opts[wjsContext].splashInterval3);
+        }
+        window.stopDlna();
+    });
+    wjsPlayer.find(".set-sleep-timer").click(function() {
+        showSleepMenu.call(wjsPlayer);
+    });
+    wjsPlayer.find(".manage-folders").click(function() {
+        showFolderMenu.call(wjsPlayer);
+    });
+    wjsPlayer.find(".torrent-data-set").click(function() {
+        $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
+        window.torrentData();
+    });
+    wjsPlayer.find(".back-to-main-set").click(function() {
+        $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
+        window.goBack();
+    });
+    wjsPlayer.find(".close-powder-set").click(function() {
+        $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
+        window.win.close()
+    });
 }
 
 function clearSubtitles() {
@@ -1690,71 +2155,119 @@ function clearSubtitles() {
 }
 
 function loadSubtitle(subtitleElement) {
+    wjsPlayer = this;
+    if (subtitleElement.indexOf("[-alt-]") > -1) {
+        var altSub = subtitleElement.split("[-alt-]")[1];
+        subtitleElement = subtitleElement.split("[-alt-]")[0];
+    }
+
     if (typeof opts[this.context].subtitles === "undefined") opts[this.context].subtitles = [];
     else if (opts[this.context].subtitles.length) opts[this.context].subtitles = [];
 
-    if (subtitleElement.indexOf("http://dl.opensubtitles.org/") == 0) subtitleElement = "http://dl.opensubtitles.org/en/download/subencoding-utf8/file/"+subtitleElement.split('/').pop();
-
+    callOpts = {};
+    callOpts.host = subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/"));
+    callOpts.path = subtitleElement.replace("http://","").substr(subtitleElement.replace("http://","").indexOf("/"));
+    if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org" && window.osCookie) {
+        callOpts.headers = { 'cookie': window.osCookie };
+    } else if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org") {
+        if (altSub)    {
+            retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
+                processSub(wjsPlayer,res,subtitleElement.split('.').pop());
+            });
+        } else this.notify("Subtitle Error");
+        return;
+    }
     resData = "";
-    
-    wjsPlayer = this;
-    var req = http.get(subtitleElement , function(res) {
-            res.on('data', function (data) {
-               resData += data;
-            });
 
-            res.on('end', function() {
-                var srt = resData;
-                opts[wjsPlayer.context].subtitles = [];
-                
-                var extension = subtitleElement.split('.').pop();
-                if (extension.toLowerCase() == "srt" || extension.toLowerCase() == "vtt") {
-            
-                    srt = strip(srt.replace(/\r\n|\r|\n/g, '\n'));
-            
-                    var srty = srt.split('\n\n'),
-                        si = 0;
-                    
-                    if (srty[0].substr(0,6).toLowerCase() == "webvtt") si = 1;
-            
-                    for (s = si; s < srty.length; s++) {
-                        var st = srty[s].split('\n');
-                        if (st.length >=2) {
-                            var n = -1;
-                            if (st[0].indexOf(' --> ') > -1) var n = 0;
-                            else if (st[1].indexOf(' --> ') > -1) var n = 1;
-                            else if (st[2].indexOf(' --> ') > -1)  var n = 2;
-                            else if (st[3].indexOf(' --> ') > -1)  var n = 3;
-                            if (n > -1) {
-                                stOrigin = st[n]
-                                var is = Math.round(toSeconds(strip(stOrigin.split(' --> ')[0])));
-                                var os = Math.round(toSeconds(strip(stOrigin.split(' --> ')[1])));
-                                var t = st[n+1];
-                                if (st.length > n+2) for (j=n+2; j<st.length; j++) t = t + '\n'+st[j];
-                                opts[wjsPlayer.context].subtitles[is] = {i:is, o: os, t: t};
-                            }
-                        }
-                    }
-                } else if (extension.toLowerCase() == "sub") {
-                    srt = srt.replace(/\r\n|\r|\n/g, '\n');
-                    
-                    srt = strip(srt);
-                    var srty = srt.split('\n');
-    
-                    var s = 0;
-                    for (s = 0; s < srty.length; s++) {
-                        var st = srty[s].split('}{');
-                        if (st.length >=2) {
-                          var is = Math.round(st[0].substr(1) /10);
-                          var os = Math.round(st[1].split('}')[0] /10);
-                          var t = st[1].split('}')[1].replace('|', '\n');
-                          if (is != 1 && os != 1) opts[wjsPlayer.context].subtitles[is] = {i:is, o: os, t: t};
-                        }
-                    }
-                }
-                opts[wjsPlayer.context].trackSub = -1;
-            });
+    var req = http.request(callOpts,function(res) {
+        if ([501,404].indexOf(res.statusCode) > -1) {
+            if (altSub)    {
+                retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
+                    processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
+                });
+            } else wjsPlayer.notify("Subtitle Error");
+        } else {
+            res.on('data', function (data) { resData += data; });
+            res.on('end', function() { processSub.call(wjsPlayer,resData,subtitleElement.split('.').pop()); });
+        }
     });
+    req.end();
+}
+
+function processSub(srt,extension) {
+    opts[this.context].subtitles = [];
+    
+//    console.log(srt);
+    
+    if (extension.toLowerCase() == "srt" || extension.toLowerCase() == "vtt") {
+
+        srt = strip(srt.replace(/\r\n|\r|\n/g, '\n'));
+
+        var srty = srt.split('\n\n'),
+            si = 0;
+        
+        if (srty[0].substr(0,6).toLowerCase() == "webvtt") si = 1;
+
+        for (s = si; s < srty.length; s++) {
+            var st = srty[s].split('\n');
+            if (st.length >=2) {
+                var n = -1;
+                if (st[0].indexOf(' --> ') > -1) var n = 0;
+                else if (st[1].indexOf(' --> ') > -1) var n = 1;
+//                else if (!st[2]) { console.log("error"); console.log(st[0]); console.log(st[1]); }
+                else if (st[2].indexOf(' --> ') > -1)  var n = 2;
+                else if (st[3].indexOf(' --> ') > -1)  var n = 3;
+                if (n > -1) {
+                    stOrigin = st[n]
+                    var is = Math.round(toSeconds(strip(stOrigin.split(' --> ')[0])));
+                    var os = Math.round(toSeconds(strip(stOrigin.split(' --> ')[1])));
+                    var t = st[n+1];
+                    if (st.length > n+2) for (j=n+2; j<st.length; j++) t = t + '\n'+st[j];
+                    opts[this.context].subtitles[is] = {i:is, o: os, t: t};
+                }
+            }
+        }
+//        console.log(opts[wjsPlayer.context].subtitles);
+    } else if (extension.toLowerCase() == "sub") {
+        srt = srt.replace(/\r\n|\r|\n/g, '\n');
+        
+        srt = strip(srt);
+        var srty = srt.split('\n');
+
+        var s = 0;
+        for (s = 0; s < srty.length; s++) {
+            var st = srty[s].split('}{');
+            if (st.length >=2) {
+              var is = Math.round(st[0].substr(1) /10);
+              var os = Math.round(st[1].split('}')[0] /10);
+              var t = st[1].split('}')[1].replace('|', '\n');
+              if (is != 1 && os != 1) opts[this.context].subtitles[is] = {i:is, o: os, t: t};
+            }
+        }
+    }
+    opts[this.context].trackSub = -1;
+}
+
+function logoAnim() {
+    if ($(".wcp-splash-screen").is(":visible")) {
+        if ($(".wcp-logo-ball:visible").length < 5) {
+            resetLogo();
+        } else {
+            el = $($(".wcp-logo-ball")[Math.floor((Math.random()*$(".wcp-logo-ball").length)+1)]);
+            
+            if (!el.is(":animated")) {
+                if (!el.is(":visible")) {
+                    el.animate({ "width": 8, "height": 8, "borderRadius": 4 },500);
+                } else {
+                    el.animate({ "width": 0, "height": 0, "borderRadius": 0 },500);
+                }
+            }
+        }
+    }
+}
+
+function resetLogo() {
+    $(".wcp-logo-ball").animate({ "width": 8, "height": 8, "borderRadius": 4 },500);
 }
 
 function preventSleep() {
@@ -1768,14 +2281,6 @@ function getContext(el) {
     else if ($(el).hasClass("wcp-wrapper")) return players["#"+el.id];
     else return players["#"+$(el).parents(".wcp-wrapper")[0].id];
 }
-function parseTime(t,total) {
-    if (typeof total === 'undefined') total = t;
-    tempHour = ("0" + Math.floor(t / 3600000)).slice(-2);
-    tempMinute = ("0" + (Math.floor(t / 60000) %60)).slice(-2);
-    tempSecond = ("0" + (Math.floor(t / 1000) %60)).slice(-2);
-    if (total >= 3600000) return tempHour+":"+tempMinute+":"+tempSecond;
-    else return tempMinute+":"+tempSecond;
-}
 function nl2br(str,is_xhtml) {
     breakTag=(is_xhtml||typeof is_xhtml==='undefined')?'<br />':'<br>';return (str+'').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g,'$1'+breakTag+'$2');
 }
@@ -1785,6 +2290,11 @@ function gcd(a,b){if(b>a){temp=a;a=b;b=temp}while(b!=0){m=a%b;a=b;b=m;}return a}
 function sel(context){return $($(this).parents(".wcp-wrapper")[0]).find(context)}
 function switchClass(el,fclass,sclass){if(el.hasClass(fclass))el.removeClass(fclass).addClass(sclass)}
 function hideSubtitles(){if(this.find(".wcp-subtitles").is(":visible"))this.find(".wcp-subtitles").hide(0)}
+wjs.prototype.isPlaying=function(){return this.vlc.playing}
+wjs.prototype.setOpeningText=function(newData){this.find(".wcp-opening-text").text(newData);return this}
+wjs.prototype.setDownloaded=function(newData){this.find(".wcp-progress-cache").css("width",(newData*100)+"%");return this}
+wjs.prototype.startPlayer=function(){this.playItem(0);return this}
+wjs.prototype.stopPlayer=function(){this.stop();return this}
 wjs.prototype.audioCount=function(){return this.vlc.audio.count}
 wjs.prototype.itemCount=function(){return this.vlc.playlist.itemCount}
 wjs.prototype.playing=function(){return this.vlc.playing}
@@ -1807,6 +2317,7 @@ wjs.prototype.onEnded=function(wjsFunction){this.catchEvent("EndReached",wjsFunc
 wjs.prototype.onStopped=function(wjsFunction){this.catchEvent("Stopped",wjsFunction);return this}
 wjs.prototype.onState=function(wjsFunction){vlcs[this.context].events.on('StateChanged',wjsFunction);return this}
 wjs.prototype.onStateInt=function(wjsFunction){vlcs[this.context].events.on('StateChangedInt',wjsFunction);return this}
+wjs.prototype.onVolume = function(wjs_function) { vlcs[this.context].events.on('VolumeChanged',wjs_function); return this; }
 wjs.prototype.onTime=function(wjsFunction){this.catchEvent("TimeChanged",wjsFunction);return this}
 wjs.prototype.onPosition=function(wjsFunction){this.catchEvent("PositionChanged",wjsFunction);return this}
 wjs.prototype.onFrameSetup=function(wjsFunction){vlcs[this.context].events.on('FrameSetup',wjsFunction);return this}

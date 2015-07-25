@@ -71,18 +71,39 @@
 .wcp-canvas { z-index: 1 }
 
 .wcp-menu {
-	font-family: 'Helvetica', 'Arial';
 	font-size: 13px;
-	letter-spacing: 1;
-	z-index: 4;
+	font-family: "Roboto";
+	letter-spacing: 1px;
+/*	font-family: 'Helvetica', 'Arial';
+	font-size: 13px;
+	letter-spacing: 1; */
+	z-index: 10;
 	width: 682px;
-	height: 261px;
+	height: 272px;
 	max-width: 90%;
 	max-height: 80%;
 	background-color: #292929;
 	color: #c0c0c0;
 	padding: 6px;
-	display: none
+	display: none;
+}
+
+.wcp-playlist {
+	height: 303px;
+}
+
+.wcp-playlist-menu-but {
+	background-color: #1c1c1c;
+	cursor: pointer;
+	padding: 5px 9px;
+	margin-right: 6px;
+	display: inline-block;
+	margin-top: -3px;
+	font-size: 12px;
+}
+
+.wcp-playlist-menu-but:hover {
+	background-color: #151515
 }
 
 .wcp-menu-title {
@@ -102,6 +123,11 @@
 	overflow-y: scroll;
 	overflow-x: hidden;
 	list-style-type: none;
+}
+
+.wcp-playlist-items {
+	height: calc(100% - 64px);
+	margin-bottom: 11px
 }
 
 .wcp-menu-item {
@@ -169,7 +195,7 @@
 
 .wcp-playlist-item:hover .wcp-disabler-img { opacity: 1 }
 
-.wcp-subtitles-item {
+.wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item {
 	width: calc(100% - 14px);
 	padding-left: 14px;
 }
@@ -291,7 +317,9 @@
 	height: 8px;
 	width: 0%;
 	display: inline-block;
-	vertical-align: top
+	vertical-align: top;
+	z-index: 10;
+	position: relative
 }
 
 .wcp-progress-pointer {
@@ -300,7 +328,20 @@
 	width: 8px;
 	margin-left: -4px;
 	display: inline-block;
-	vertical-align: top
+	vertical-align: top;
+	z-index: 10;
+	position: relative
+}
+
+.wcp-progress-cache {
+	height: 8px;
+	width: 0%;
+	background: #3e3e3e;
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+	z-index: 5
 }
 
 .wcp-button {
@@ -390,11 +431,11 @@
 }
 
 /* Playback Button Icons */
-.wcp-prev:before { content: "\E80A"; font-size: 11px }
+.wcp-prev:before { content: "\E80A"; font-size: 11px; vertical-align: top }
 .wcp-play:before { content: "\E87F" }
 .wcp-pause:before { content: "\E880" }
 .wcp-replay:before { content: "\E8A7" }
-.wcp-next:before { content: "\E809"; font-size: 11px }
+.wcp-next:before { content: "\E809"; font-size: 11px; vertical-align: top }
 
 /* Audio Related Button Icons */
 .wcp-mute:before { content: "\E877" }
@@ -409,6 +450,9 @@
 /* Subtitle Button */
 /* .wcp-subtitle-but { display: none } */
 .wcp-subtitle-but:before { content: "\E83A"; font-size: 23px }
+
+.wcp-subtitle-icon:before { font-family: 'Glyphs'; content: "\E83A"; font-style: normal; font-size: 34px }
+.wcp-subtitle-icon-big:before { font-family: 'Glyphs'; content: "\E83A"; font-style: normal; font-size: 50px }
 
 /* Fullscreen Button Icons */
 .wcp-minimize:before { content: "\E805"; font-size: 24px }
@@ -474,6 +518,85 @@
 	text-align: center
 }
 
+@-webkit-keyframes blink {
+    0% {
+        opacity:1;
+    }
+    50% {
+        opacity:0;
+    }
+    100% {
+        opacity:1;
+    }
+}
+@-moz-keyframes blink {
+    0% {
+        opacity:1;
+    }
+    50% {
+        opacity:0;
+    }
+    100% {
+        opacity:1;
+    }
+}
+.wcp-img {
+	position: absolute;
+	-webkit-transition: all 5s ease-in-out;
+    -moz-transition: all 5s ease-in-out;
+    -o-transition: all 5s ease-in-out;
+    -ms-transition: all 5s ease-in-out;
+    transition: all 5s ease-in-out;
+    
+    -webkit-animation-direction: normal;
+    -webkit-animation-duration: 5s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-name: blink;
+    -webkit-animation-timing-function: ease-in-out;
+    
+	-moz-animation-direction: normal;
+    -moz-animation-duration: 5s;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-name: blink;
+    -moz-animation-timing-function: ease-in-out;    
+}
+
+.wcp-opening-text {
+	font-family: 'Roboto';
+	position: relative;
+	font-size: 18px;
+	color: #fff;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+	top: 12px;
+	padding-bottom: 12px;
+	display: inline-block;
+}
+
+.wcp-logo-ball {
+	width: 8px;
+	height: 8px;
+	border-radius: 4px;
+	background: #fff;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+}
+
+.wcp-logo-ball-holder {
+	width: 8px;
+	height: 8px;
+	margin: 0 1px;
+	display: inline-block;
+	vertical-align: middle;
+	position: relative
+}
+
+.wcp-splash-screen {
+	text-align: center;
+}
+
 .wcp-tooltip {
 	position: absolute;
 	z-index: 1070;
@@ -511,4 +634,28 @@
 	text-decoration: none;
 	background-color: #000;
 	border-radius: 2px;
+}
+
+.wcp-settings-but {
+	color: #fff;
+	position: absolute;
+	top: 8px;
+	right: 17px;
+	z-index: 5;
+	color: #fff;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+	font-size: 28px;
+	text-decoration: none;
+	font-style: normal;
+	opacity: 0.7;
+	cursor: pointer
+}
+.wcp-settings-but-mini {
+  font-size: 22px;
+  top: 2px;
+}
+i.wcp-settings-icon:before {
+	font-family: 'Glyphs';
+	content: "\E801";
+	font-style: normal
 }
