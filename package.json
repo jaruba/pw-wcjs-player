@@ -1,8 +1,8 @@
 
 {
-    "name": "wcjs-player",
-    "description": "Player for WebChimera.js (libvlc wrapper)",
-    "version": "0.4.7",
+    "name": "pw-wcjs-player",
+    "description": "Customized WebChimera.js Player for use in Powder Player",
+    "version": "0.0.1",
     "license" : "LGPL-2.1",
     "author": "Branza Victor-Alexandru <branza.alex@gmail.com>",
     "keywords": [
@@ -15,7 +15,7 @@
     ],
     "repository": {
         "type" : "git",
-        "url" : "https://github.com/jaruba/wcjs-player"
+        "url" : "https://github.com/jaruba/pw-wcjs-player"
     },
     "dependencies": {
         "wcjs-renderer": "*",
