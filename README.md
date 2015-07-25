@@ -1,4 +1,7 @@
 # WebChimera.js Player
+
+**Custom version of [WebChimera.js Player](https://github.com/jaruba/wcjs-player) used in [Powder Player](https://github.com/jaruba/PowderPlayer). This module will not work outside Powder Player's app environment.**
+
 **Description**
 
 An Open Source Player for WebChimera.js (libvlc binding for node.js/io.js/NW.js/Electron)
