@@ -1904,7 +1904,7 @@ function printPlaylist() {
             if (!$(this).hasClass("wcp-menu-selected")) {
                 if (window.waitForNext) window.waitForNext = false;
                 wjsPlayer = getContext(this);
-                if (wjsPlayer.itemDesc(plItem.index()).disabled) {
+                if (wjsPlayer.itemDesc($(this).index()).disabled) {
                     wjsPlayer.vlc.playlist.items[$(this).index()].disabled = false;
                     $(this).removeClass("wcp-disabled");
                 }
