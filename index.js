@@ -2340,7 +2340,9 @@ function attachHotkeys() {
         }
     });
 
-    dispatcher.on('esc',function() {
+    dispatcher.on('ctrl + d',function() {
+		window.win.showDevTools();
+	}).on('esc',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
             if (window.document.webkitFullscreenElement == null) wjsPlayer.find(".wcp-menu-close")[0].trigger("click");
