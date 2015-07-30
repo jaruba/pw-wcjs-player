@@ -33,7 +33,7 @@ var vlcs = {},
     events = require('events'),
     retriever = require('subtitles-grouping/lib/retriever'),
     path = require('path'),
-    relbase = "/"+path.relative(path.dirname(require.main.filename), __dirname),
+    relbase = "./"+path.relative(path.dirname(require.main.filename), __dirname),
     sleepId,
     cookie,
     delayedTime;
