@@ -293,7 +293,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             }
         }(newid)).bind("mousemove",function(i) {
             return function(event) {
-                mouseMoved.call(players[i],event);
+                if (window.allowMouseMove) mouseMoved.call(players[i],event);
             }
         }(newid));
     }
@@ -408,40 +408,42 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     });
     
     wjs(newid).wrapper.parent().bind("mousemove",function(e) {
-        wjsPlayer = getContext(this);
-        if (opts[wjsPlayer.context].uiHidden === false) {
-            if (vlcs[wjsPlayer.context].multiscreen && window.document.webkitFullscreenElement == null) {
-                wjsPlayer.wrapper.css({cursor: 'pointer'});
-            } else {
-                clearTimeout(vlcs[wjsPlayer.context].hideUI);
-                wjsPlayer.wrapper.css({cursor: 'default'});
-                
-                if (!window.dlna.initiated) {
-                    if (window.document.webkitFullscreenElement == null) {
-                        if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "minimized") {
-                            wjsPlayer.find(".wcp-titlebar").stop().show(0);
-                            if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
-                            if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
-                        }
-                    } else {
-                        if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "fullscreen") {
-                            wjsPlayer.find(".wcp-titlebar").stop().show(0);
-                            if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
-                            if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
-                        }
-                    }
-                }
-    
-                wjsPlayer.find(".wcp-toolbar").stop().show(0);
-                wjsPlayer.find(".wcp-settings-but").stop().show(0);
-                if (!volDrag && !seekDrag) {
-                    if ($(wjsPlayer.find(".wcp-toolbar").selector + ":hover").length > 0) {
-                        vlcs[wjsPlayer.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(wjsPlayer.context),3000);
-                        vlcs[wjsPlayer.context].timestampUI = Math.floor(Date.now() / 1000);
-                    } else vlcs[wjsPlayer.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(wjsPlayer.context),3000);
-                }
-            }
-        } else wjsPlayer.wrapper.css({cursor: 'default'});
+		if (window.allowMouseMove) {
+			wjsPlayer = getContext(this);
+			if (opts[wjsPlayer.context].uiHidden === false) {
+				if (vlcs[wjsPlayer.context].multiscreen && window.document.webkitFullscreenElement == null) {
+					wjsPlayer.wrapper.css({cursor: 'pointer'});
+				} else {
+					clearTimeout(vlcs[wjsPlayer.context].hideUI);
+					wjsPlayer.wrapper.css({cursor: 'default'});
+					
+					if (!window.dlna.initiated) {
+						if (window.document.webkitFullscreenElement == null) {
+							if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "minimized") {
+								wjsPlayer.find(".wcp-titlebar").stop().show(0);
+								if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
+								if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
+							}
+						} else {
+							if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "fullscreen") {
+								wjsPlayer.find(".wcp-titlebar").stop().show(0);
+								if (wjsPlayer.find(".wcp-status").css("top") == "10px") wjsPlayer.find(".wcp-status").css("top", "35px");
+								if (wjsPlayer.find(".wcp-notif").css("top") == "10px") wjsPlayer.find(".wcp-notif").css("top", "35px");
+							}
+						}
+					}
+		
+					wjsPlayer.find(".wcp-toolbar").stop().show(0);
+					wjsPlayer.find(".wcp-settings-but").stop().show(0);
+					if (!volDrag && !seekDrag) {
+						if ($(wjsPlayer.find(".wcp-toolbar").selector + ":hover").length > 0) {
+							vlcs[wjsPlayer.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(wjsPlayer.context),3000);
+							vlcs[wjsPlayer.context].timestampUI = Math.floor(Date.now() / 1000);
+						} else vlcs[wjsPlayer.context].hideUI = setTimeout(function(i) { return function() { hideUI.call(players[i]); } }(wjsPlayer.context),3000);
+					}
+				}
+			} else wjsPlayer.wrapper.css({cursor: 'default'});
+		}
     });
     
     /* Progress and Volume Bars */
@@ -1556,6 +1558,7 @@ function isMediaChanged() {
     
     if (window.win.title != this.itemDesc(this.currentItem()).title) {
         window.win.title = this.itemDesc(this.currentItem()).title;
+		window.winTitleLeft(this.itemDesc(this.currentItem()).title);
     }
     
     opts[this.context].firstTime = true;
@@ -2306,7 +2309,7 @@ function attachHotkeys() {
     wjsContext = this.context;
 
     $(this.wrapper).bind('mousewheel', function(event) {
-        if (shouldHotkey() && !$(".wcp-menu").is(":visible")) {
+        if (shouldHotkey() && !$(".wcp-menu").is(":visible") && window.allowScrollHotkeys) {
             wjsPlayer = players[wjsContext];
             newVolume = (wjsPlayer.volume()*0.625);
     
@@ -2711,6 +2714,7 @@ wjs.prototype.width=function(){return this.canvas.width}
 wjs.prototype.height=function(){return this.canvas.height}
 wjs.prototype.stateInt=function(){return this.vlc.state}
 wjs.prototype.find=function(el){return this.wrapper.find(el)}
+wjs.prototype.refreshSize=function(){autoResize()}
 wjs.prototype.onMediaChanged=function(wjsFunction){this.catchEvent("MediaChanged",wjsFunction);return this}
 wjs.prototype.onIdle=function(wjsFunction){this.catchEvent("NothingSpecial",wjsFunction);return this}
 wjs.prototype.onOpening=function(wjsFunction){this.catchEvent("Opening",wjsFunction);return this}
