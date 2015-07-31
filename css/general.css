@@ -88,7 +88,7 @@
 	display: none;
 }
 
-.wcp-playlist {
+.wcp-playlist, .wcp-subtitles {
 	height: 303px;
 }
 
@@ -125,7 +125,7 @@
 	list-style-type: none;
 }
 
-.wcp-playlist-items {
+.wcp-playlist-items, .wcp-subtitles-items {
 	height: calc(100% - 64px);
 	margin-bottom: 11px
 }
@@ -195,7 +195,7 @@
 
 .wcp-playlist-item:hover .wcp-disabler-img { opacity: 1 }
 
-.wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item {
+.wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item, .wcp-encodings-item {
 	width: calc(100% - 14px);
 	padding-left: 14px;
 }

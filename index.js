@@ -37,7 +37,8 @@ var vlcs = {},
     sleepId,
     cookie,
     delayedTime,
-	supportedLinks = ["youtube.com","video.google.com",".googlevideo.com","vimeo.com","dailymotion.com","dailymotion.co.uk","bbc.co.uk","trailers.apple.com","break.com","canalplus.fr","extreme.com","france2.fr","jamendo.com","koreus.com","lelombrik.net","liveleak.com","metacafe.com","mpora.com","pinkbike.com","pluzz.francetv.fr","rockbox.org","soundcloud.com","zapiks.com","metachannels.com","joox.com"];
+	supportedLinks = ["youtube.com","video.google.com",".googlevideo.com","vimeo.com","dailymotion.com","dailymotion.co.uk","bbc.co.uk","trailers.apple.com","break.com","canalplus.fr","extreme.com","france2.fr","jamendo.com","koreus.com","lelombrik.net","liveleak.com","metacafe.com","mpora.com","pinkbike.com","pluzz.francetv.fr","rockbox.org","soundcloud.com","zapiks.com","metachannels.com","joox.com"],
+	supportedEncoding = [["Auto Detect","auto"],["Universal (UTF-8)","utf8"],["Universal (UTF-16)","utf16"],["Universal (big endian UTF-16)","UTF-16BE"],["Universal (little endian UTF-16)","utf16le"],["Universal, Chinese (GB18030)","GB18030"],["Western European (Latin-9)","latin9"],["Western European (Windows-1252)","windows1252"],["Western European (IBM 00850)","ibm850"],["Eastern European (Latin-2)","latin2"],["Eastern European (Windows-1250)","windows1250"],["Esperanto (Latin-3)","latin3"],["Nordic (Latin-6)","latin6"],["Cyrillic (Windows-1251)","windows1251"],["Russian (KOI8-R)","koi8-ru"],["Ukranian (KOI8-U)","koi8-u"],["Arabic (ISO 8859-6)","ISO-8859-6"],["Arabic (Windows-1256)","windows1256"],["Greek (ISO 8859-7)","ISO-8859-7"],["Greek (Windows-1253)","windows1253"],["Hebrew (ISO 8859-8)","ISO-8859-8"],["Hebrew (Windows-1255)","windows1255"],["Turkish (ISO 8859-9)","ISO-8859-9"],["Turkish (Windows-1254)","windows1254"],["Thai (TIS 620-2533/ISO 8859-11)","ISO-8859-11"],["Thai (Windows-874)","windows874"],["Baltic (Latin-7)","latin7"],["Baltic (Windows-1257)","windows1257"],["Celtic (Latin-8)","latin8"],["South-Eastern European (Latin-10)","latin10"],["Simplified Chinese (ISO-2022-CN-EXT)","ISO-2022-CN-EXT"],["Simplified Chinese Unix (EUC-CN)","EUC-CN"],["Japanese (7-bits JIS/ISO-2022-JP-2)","ISO-2022-JP-2"],["Japanese Unix (EUC-JP)","EUC-JP"],["Japanese (Shift JIS)","Shift_JIS"],["Korean (EUC-KR/CP949)","EUC-KR"],["Korean (ISO-2022-KR)","ISO-2022-KR"],["Traditional Chinese (Big5)","Big5"],["Traditional Chinese Unix (EUC-TW)","EUC-TW"],["Hong-Kong Supplementary (HKSCS)","Big5-HKSCS"],["Vietnamese (VISCII)","viscii"],["Vietnamese (Windows-1258)","windows1258"]];
     
 require('jquery-ui/sortable');
 try{var powerSaveBlocker=require('remote').require('power-save-blocker')}catch(ex){var sleep=require('computer-sleep/sleep')}
@@ -266,7 +267,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 
     if (typeof opts[newid].allowFullscreen === 'undefined') opts[newid].allowFullscreen = true;
     
-    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-center wcp-splash-screen" style="overflow: hidden"><div><div style="position: absolute; width: 100%; top: 15px; line-height: 8px; z-index: 10"><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div></div><img class="wcp-img" src="'+relbase+'/images/icon_h.png"><img class="wcp-img-back" src="'+relbase+'/images/icon.png"></div><span class="wcp-opening-text"></span></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul><a class="wcp-add-url" href="#open-url" style="color: #c0c0c0"><div class="wcp-playlist-menu-but">Add URL</div></a><div class="wcp-playlist-menu-but wcp-add-video">Add Video</div><div class="wcp-playlist-menu-but wcp-scan-library">Scan Library</div><div class="wcp-playlist-menu-but wcp-scan-server">Scan Server</div></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul></div><div class="wcp-menu wcp-settings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Player Settings</div><ul class="wcp-menu-items wcp-settings-items"></ul></div><div class="wcp-menu wcp-sleep-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Sleep Timer Settings</div><ul class="wcp-menu-items wcp-sleep-items"></ul></div><div class="wcp-menu wcp-folder-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Manage Folders</div><ul class="wcp-menu-items wcp-folder-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div><div class="wcp-progress-cache"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
+    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-center wcp-splash-screen" style="overflow: hidden"><div><div style="position: absolute; width: 100%; top: 15px; line-height: 8px; z-index: 10"><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div></div><img class="wcp-img" src="'+relbase+'/images/icon_h.png"><img class="wcp-img-back" src="'+relbase+'/images/icon.png"></div><span class="wcp-opening-text"></span></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul><a class="wcp-add-url" href="#open-url" style="color: #c0c0c0"><div class="wcp-playlist-menu-but">Add URL</div></a><div class="wcp-playlist-menu-but wcp-add-video">Add Video</div><div class="wcp-playlist-menu-but wcp-scan-library">Scan Library</div><div class="wcp-playlist-menu-but wcp-scan-server">Scan Server</div></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul><div class="wcp-playlist-menu-but wcp-add-subtitle">Add File</div><div class="wcp-playlist-menu-but wcp-set-encodings">Set Encoding</div></div><div class="wcp-menu wcp-settings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Player Settings</div><ul class="wcp-menu-items wcp-settings-items"></ul></div><div class="wcp-menu wcp-encodings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Encoding</div><ul class="wcp-menu-items wcp-encodings-items"></ul></div><div class="wcp-menu wcp-sleep-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Sleep Timer Settings</div><ul class="wcp-menu-items wcp-sleep-items"></ul></div><div class="wcp-menu wcp-folder-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Manage Folders</div><ul class="wcp-menu-items wcp-folder-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div><div class="wcp-progress-cache"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
     if (!opts[newid].allowFullscreen) playerbody += ' style="cursor: not-allowed; color: rgba(123,123,123,0.6);"';
     playerbody += '></div><div class="wcp-button wcp-right wcp-playlist-but"></div><div class="wcp-button wcp-right wcp-subtitle-but"></div></div><div class="wcp-status"></div><div class="wcp-notif"></div><div class="wcp-subtitle-text"></div><div class="wcp-tooltip"><div class="wcp-tooltip-arrow"></div><div class="wcp-tooltip-inner">00:00</div></div><div class="wcp-settings-but"><i class="wcp-settings-icon"></i></div></div>';
     
@@ -276,7 +277,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     $(this.context).each(function(ij,el) { if (!$(el).hasClass("webchimeras")) $(el).addClass("webchimeras"); el.innerHTML = playerbody; });
     
-    $(".wcp-subtitle-but").hide(0);
+//    $(".wcp-subtitle-but").hide(0);
     $(".wcp-status").hide(0);
     
     if (vlcs[newid].multiscreen) {
@@ -318,6 +319,14 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         window.scanLibrary();
     });
 
+	wjs(newid).wrapper.find(".wcp-set-encodings").click(function() {
+        showEncodings.call(getContext(this));
+    });
+	
+	wjs(newid).wrapper.find(".wcp-add-subtitle").click(function() {
+        window.chooseFile('#subtitleDialog');
+    });
+	
     wjs(newid).wrapper.find(".wcp-menu-close").click(function() {
         wjsPlayer = getContext(this);
         if (wjsPlayer.find(".wcp-playlist").is(":visible")) {
@@ -331,6 +340,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             wjsPlayer.find(".wcp-sleep-menu").hide(0);
         } else if (wjsPlayer.find(".wcp-folder-menu").is(":visible")) {
             wjsPlayer.find(".wcp-folder-menu").hide(0);
+        } else if (wjsPlayer.find(".wcp-encodings-menu").is(":visible")) {
+            wjsPlayer.find(".wcp-encodings-menu").hide(0);
         }
     });
     
@@ -1656,7 +1667,8 @@ function isPlaying() {
         
         opts[this.context].subDelay = 0;
         
-        if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
+//        if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
+		this.find(".wcp-subtitle-but").show(0);
         
         if (opts[this.context].setSub) {
             this.subTrack(opts[this.context].setSub);
@@ -1798,6 +1810,7 @@ function showPlaylist() {
         else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
         else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
         else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+	    else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
         this.find(".wcp-playlist").show(0);
         printPlaylist.call(this);
     }
@@ -1809,7 +1822,20 @@ function hidePlaylist() {
         this.find(".wcp-playlist").hide(0);
     }
 }
-    
+
+
+function showEncodings() {
+    if (!this.find(".wcp-encodings-menu").is(":visible")) {
+        if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
+        else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+        else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
+        else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+		else if (this.find(".wcp-playlist").is(":visible")) this.find(".wcp-playlist").hide(0);
+		this.find(".wcp-encodings-menu").show(0);
+        printEncodings.call(this);
+    }
+}
+
 function showSleepMenu() {
     if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
     if (!this.find(".wcp-sleep-menu").is(":visible")) {
@@ -1831,6 +1857,7 @@ function showSettings() {
     else if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
     else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
     else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+    else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
     if (!this.find(".wcp-settings-menu").is(":visible")) {
         this.find(".wcp-settings-menu").show(0);
         printSettings.call(this);
@@ -1849,6 +1876,7 @@ function showSubtitles() {
         } else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
         else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
         else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+	    else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
         this.find(".wcp-subtitles").show(0);
         printSubtitles.call(this);
     }
@@ -2040,7 +2068,7 @@ function printSubtitles() {
                 if (newSub < 2) {
                     loadSubtitle.call(wjsPlayer,itemSubtitles[k]);
                     wjsPlayer.notify("Subtitle: "+k);
-                    if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
+                    if (itemSubtitles[k].indexOf("http://dl.opensubtitles.org/") == 0) if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
                     else window.localStorage.subLang = k;
                     break;
                 }
@@ -2099,6 +2127,37 @@ function printSleepMenu() {
         }
         wjsPlayer.find(".wcp-sleep-menu").hide(0);
         wjsPlayer.notify("Sleep Timer: "+$(this).text());
+    });
+}
+
+function printEncodings() {
+    wjsPlayer = this;
+    settingsItems = this.find(".wcp-encodings-items");
+
+    generatePlaylist = "";
+    oi = 0;
+    supportedEncoding.forEach(function(el,ij) {
+        generatePlaylist += '<li class="wcp-menu-item wcp-encodings-item';
+        if (el[1] == window.localStorage.subEncoding) generatePlaylist += ' wcp-menu-selected';
+        generatePlaylist += '" >'+el[0]+'</li>';
+        oi++;
+    });
+
+    settingsItems.html("");
+    settingsItems.html(generatePlaylist);
+    
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-sleep-item").css("height")))) {
+        settingsItems.css("cursor","pointer");
+    } else settingsItems.css("cursor","default");
+    
+    wjsPlayer.find(".wcp-encodings-item").click(function() {
+        wjsPlayer = getContext(this);
+
+		window.localStorage.subEncoding = supportedEncoding[$(this).index()][1];
+		printEncodings.call(wjsPlayer);
+		if (wjsPlayer.subTrack() > 0) wjsPlayer.notify("Reloaded Subtitle");
+		else wjsPlayer.notify("Encoding Saved");
+		wjsPlayer.subTrack(wjsPlayer.subTrack());
     });
 }
 
@@ -2223,9 +2282,14 @@ function loadSubtitle(subtitleElement) {
     } else if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org") {
         if (altSub)    {
             retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
-                processSub(wjsPlayer,res,subtitleElement.split('.').pop());
-            });
+                processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
+            },{ charset: window.localStorage.subEncoding });
         } else this.notify("Subtitle Error");
+        return;
+    } else {
+		retriever.retrieveSrt(subtitleElement,function(err,res) {
+			processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
+		},{ charset: window.localStorage.subEncoding });
         return;
     }
     resData = "";
@@ -2235,7 +2299,7 @@ function loadSubtitle(subtitleElement) {
             if (altSub)    {
                 retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
                     processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
-                });
+                },{ charset: window.localStorage.subEncoding });
             } else wjsPlayer.notify("Subtitle Error");
         } else {
             res.on('data', function (data) { resData += data; });
@@ -2278,7 +2342,7 @@ function processSub(srt,extension) {
                 }
             }
         }
-//        console.log(opts[wjsPlayer.context].subtitles);
+//		console.log(opts[this.context].subtitles);
     } else if (extension.toLowerCase() == "sub") {
         srt = srt.replace(/\r\n|\r|\n/g, '\n');
         
