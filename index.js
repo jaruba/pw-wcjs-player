@@ -36,7 +36,8 @@ var vlcs = {},
     relbase = "./"+path.relative(path.dirname(require.main.filename), __dirname),
     sleepId,
     cookie,
-    delayedTime;
+    delayedTime,
+	supportedLinks = ["youtube.com","video.google.com",".googlevideo.com","vimeo.com","dailymotion.com","dailymotion.co.uk","bbc.co.uk","trailers.apple.com","break.com","canalplus.fr","extreme.com","france2.fr","jamendo.com","koreus.com","lelombrik.net","liveleak.com","metacafe.com","mpora.com","pinkbike.com","pluzz.francetv.fr","rockbox.org","soundcloud.com","zapiks.com","metachannels.com","joox.com"];
     
 require('jquery-ui/sortable');
 try{var powerSaveBlocker=require('remote').require('power-save-blocker')}catch(ex){var sleep=require('computer-sleep/sleep')}
@@ -180,6 +181,10 @@ wjs.prototype.stop = function() {
     positionChanged.call(this,0);
     this.find(".wcp-time-current").text("");
     this.find(".wcp-time-total").text("");
+	opts[this.context].setSingle = true;
+    vlcs[this.context].vlc.playlist.mode = vlcs[this.context].vlc.playlist.Normal;
+	this.find(".wcp-prev").hide(0);
+	this.find(".wcp-next").hide(0);
     return this;
 }
 
@@ -267,6 +272,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     opts[newid].currentSub = 0;
     opts[newid].trackSub = -1;
+	opts[newid].setSingle = true;
     
     $(this.context).each(function(ij,el) { if (!$(el).hasClass("webchimeras")) $(el).addClass("webchimeras"); el.innerHTML = playerbody; });
     
@@ -682,7 +688,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     }(newid);
     
     // set playlist mode to single playback, the player has it's own playlist mode feature
-    vlcs[newid].vlc.playlist.mode = vlcs[newid].vlc.playlist.Single;
+    vlcs[newid].vlc.playlist.mode = vlcs[newid].vlc.playlist.Normal;
     
     players[newid] = new wjs(newid);
     
@@ -1494,6 +1500,19 @@ function fullscreenOff() {
 
 // player event handlers
 function timePassed(t) {
+	if (opts[this.context].setSingle) {
+		if (t > 0 && t < 1000 && !new RegExp(supportedLinks.join("|")).test(this.itemDesc(this.currentItem()).mrl)) {
+			vlcs[this.context].vlc.playlist.mode = vlcs[this.context].vlc.playlist.Single;
+		}
+		opts[this.context].setSingle = false;
+	}
+	if (t > 0 && t < 1000 && this.find(".wcp-replay").length > 0) {
+        switchClass(this.find(".wcp-replay"),"wcp-replay","wcp-pause");
+        if (this.currentItem() == 0 && this.itemCount() > 0) {
+            this.find(".wcp-prev").show(0);
+            this.find(".wcp-next").show(0);
+        }
+	}
     if (t > 0) this.find(".wcp-time-current").text(this.parseTime(t,this.vlc.length));
     else if (this.find(".wcp-time-current").text() != "" && this.find(".wcp-time-total").text() == "") this.find(".wcp-time-current").text("");
     
@@ -1671,7 +1690,7 @@ function hasEnded() {
             this.find(".wcp-time-total").text("");
             // End Reconnect if connection to server lost
         } else {
-            if (opts[this.context].loop && this.currentItem() +1 == this.itemCount()) this.playItem(this.currentItem());
+            if (opts[this.context].loop && this.currentItem() +1 == this.itemCount()) this.playItem(0);
             else if (this.currentItem() +1 < this.itemCount()) this.next();
         }
     }
