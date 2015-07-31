@@ -2735,7 +2735,7 @@ wjs.prototype.width=function(){return this.canvas.width}
 wjs.prototype.height=function(){return this.canvas.height}
 wjs.prototype.stateInt=function(){return this.vlc.state}
 wjs.prototype.find=function(el){return this.wrapper.find(el)}
-wjs.prototype.refreshSize=function(){autoResize()}
+wjs.prototype.refreshSize=function(d){if(!d)d=0;setTimeout(function(){autoResize()},d);return this}
 wjs.prototype.onMediaChanged=function(wjsFunction){this.catchEvent("MediaChanged",wjsFunction);return this}
 wjs.prototype.onIdle=function(wjsFunction){this.catchEvent("NothingSpecial",wjsFunction);return this}
 wjs.prototype.onOpening=function(wjsFunction){this.catchEvent("Opening",wjsFunction);return this}
