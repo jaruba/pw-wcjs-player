@@ -2273,6 +2273,8 @@ function printSettings() {
         wjsPlayer = getContext(this);
         $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
         window.findDlnaClient();
+		wjsPlayer.find(".wcp-subtitle-text").html("");
+		opts[wjsPlayer.context].currentSub = 0;
         var wjsContext = wjsPlayer.context;
         opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
         opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
