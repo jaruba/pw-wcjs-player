@@ -288,6 +288,60 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         wjs(newid).wrapper.css({cursor: 'pointer'});
     }
 
+	// drag and drop logic
+	
+	var holder = window.document.getElementById('player_wrapper');
+	holder.ondragover = function () {
+		$(this).addClass('wcp-drag-hover');
+		return false;
+	};
+	holder.ondragleave = function () {
+		$(this).removeClass('wcp-drag-hover');
+		return false;
+	};
+	holder.ondrop = function (nid) {
+		return function(e) {
+		  e.preventDefault();
+		  window.win.focus();
+		  
+		  if (e.dataTransfer.files.length == 1) {
+			  if (["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
+				  if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
+					  newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"file:///'+e.dataTransfer.files[0].path+'"}';
+				  } else {
+					  newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
+				  }
+				newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
+				if (window.IsJsonString(newSettings)) {
+					newSettings = JSON.parse(newSettings);
+					if (newSettings.subtitles) {
+						oldString = JSON.stringify(newSettings.subtitles);
+						newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
+					}
+				} else newSettings = {};
+				newSettings.subtitles = JSON.parse(newString);
+				players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
+				players[nid].subTrack(players[nid].subCount()-1);
+				players[nid].notify("Subtitle Loaded");
+			  } else {
+				  window.runURL(e.dataTransfer.files[0].path);
+				  players[nid].notify("Added to Playlist");
+			  }
+		  } else {
+			  var newFiles = [];
+			  for (var i = 0; i < e.dataTransfer.files.length; ++i) newFiles[i] = e.dataTransfer.files[i].path;
+			  window.runMultiple(newFiles);
+			  players[nid].notify("Added to Playlist");
+		  }
+		  
+		  $(this).removeClass('wcp-drag-hover');
+		  players[nid].refreshPlaylist();
+		  return false;
+		}
+	}(newid);
+	
+	// end drag and drop logic
+
     wjs(newid).canvas = $(newid)[0].firstChild.firstChild;
 
     // resize video when window is resized
