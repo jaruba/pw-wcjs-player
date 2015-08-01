@@ -195,7 +195,7 @@
 
 .wcp-playlist-item:hover .wcp-disabler-img { opacity: 1 }
 
-.wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item, .wcp-encodings-item {
+.wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item, .wcp-encodings-item, .wcp-dlna-clients-item {
 	width: calc(100% - 14px);
 	padding-left: 14px;
 }
@@ -658,4 +658,28 @@ i.wcp-settings-icon:before {
 	font-family: 'Glyphs';
 	content: "\E801";
 	font-style: normal
+}
+
+.wcp-dlna-buttons {
+	z-index: 9;
+	display: none
+}
+
+.wcp-dlna-button {
+	background-color: #292929;
+	border: 1px solid #696969;
+	color: #b6b6b6;
+	height: 34px;
+	line-height: 34px;
+	padding: 0 9px;
+	font-size: 14px;
+	font-family: "Roboto";
+	letter-spacing: 1px;
+	display: inline-block;
+	cursor: pointer
+}
+
+.wcp-dlna-button:hover {
+	background-color: #e5e5e5;
+	color: #131313;
 }

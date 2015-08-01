@@ -267,9 +267,9 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 
     if (typeof opts[newid].allowFullscreen === 'undefined') opts[newid].allowFullscreen = true;
     
-    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-center wcp-splash-screen" style="overflow: hidden"><div><div style="position: absolute; width: 100%; top: 15px; line-height: 8px; z-index: 10"><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div></div><img class="wcp-img" src="'+relbase+'/images/icon_h.png"><img class="wcp-img-back" src="'+relbase+'/images/icon.png"></div><span class="wcp-opening-text"></span></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul><a class="wcp-add-url" href="#open-url" style="color: #c0c0c0"><div class="wcp-playlist-menu-but">Add URL</div></a><div class="wcp-playlist-menu-but wcp-add-video">Add Video</div><div class="wcp-playlist-menu-but wcp-scan-library">Scan Library</div><div class="wcp-playlist-menu-but wcp-scan-server">Scan Server</div></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul><div class="wcp-playlist-menu-but wcp-add-subtitle">Add File</div><div class="wcp-playlist-menu-but wcp-set-encodings">Set Encoding</div></div><div class="wcp-menu wcp-settings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Player Settings</div><ul class="wcp-menu-items wcp-settings-items"></ul></div><div class="wcp-menu wcp-encodings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Encoding</div><ul class="wcp-menu-items wcp-encodings-items"></ul></div><div class="wcp-menu wcp-sleep-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Sleep Timer Settings</div><ul class="wcp-menu-items wcp-sleep-items"></ul></div><div class="wcp-menu wcp-folder-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Manage Folders</div><ul class="wcp-menu-items wcp-folder-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div><div class="wcp-progress-cache"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
+    playerbody = '<div' + targetid + ' style="height: 100%"><div class="wcp-center" style="overflow: hidden"><canvas class="wcp-canvas wcp-center"></canvas></div><div class="wcp-center wcp-splash-screen" style="overflow: hidden"><div><div style="position: absolute; width: 100%; top: 15px; line-height: 8px; z-index: 10"><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><br><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div><div class="wcp-logo-ball-holder"><div class="wcp-logo-ball"></div></div></div><img class="wcp-img" src="'+relbase+'/images/icon_h.png"><img class="wcp-img-back" src="'+relbase+'/images/icon.png"></div><span class="wcp-opening-text"></span></div><div class="wcp-surface"></div><div class="wcp-menu wcp-playlist wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Playlist Menu</div><ul class="wcp-menu-items wcp-playlist-items"></ul><a class="wcp-add-url" href="#open-url" style="color: #c0c0c0"><div class="wcp-playlist-menu-but">Add URL</div></a><div class="wcp-playlist-menu-but wcp-add-video">Add Video</div><div class="wcp-playlist-menu-but wcp-scan-library">Scan Library</div><div class="wcp-playlist-menu-but wcp-scan-server">Scan Server</div></div><div class="wcp-menu wcp-subtitles wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Menu</div><ul class="wcp-menu-items wcp-subtitles-items"></ul><div class="wcp-playlist-menu-but wcp-add-subtitle">Add File</div><div class="wcp-playlist-menu-but wcp-set-encodings">Set Encoding</div></div><div class="wcp-menu wcp-settings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Player Settings</div><ul class="wcp-menu-items wcp-settings-items"></ul></div><div class="wcp-menu wcp-encodings-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Subtitle Encoding</div><ul class="wcp-menu-items wcp-encodings-items"></ul></div><div class="wcp-menu wcp-dlna-clients-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Known DLNA Devices</div><ul class="wcp-menu-items wcp-dlna-clients-items"></ul></div><div class="wcp-menu wcp-sleep-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Sleep Timer Settings</div><ul class="wcp-menu-items wcp-sleep-items"></ul></div><div class="wcp-menu wcp-folder-menu wcp-center"><div class="wcp-menu-close"></div><div class="wcp-menu-title">Manage Folders</div><ul class="wcp-menu-items wcp-folder-items"></ul></div><div class="wcp-pause-anim wcp-center"><i class="wcp-anim-basic wcp-anim-icon-play"></i></div><div class="wcp-titlebar"><span class="wcp-title"></span></div><div class="wcp-toolbar"><div class="wcp-progress-bar"><div class="wcp-progress-seen"></div><div class="wcp-progress-pointer"></div><div class="wcp-progress-cache"></div></div><div class="wcp-button wcp-left wcp-prev" style="display: none"></div><div class="wcp-button wcp-left wcp-pause"></div><div class="wcp-button wcp-left wcp-next" style="display: none"></div><div class="wcp-button wcp-left wcp-vol-button wcp-volume-medium"></div><div class="wcp-vol-control"><div class="wcp-vol-bar"><div class="wcp-vol-bar-full"></div><div class="wcp-vol-bar-pointer"></div></div></div><div class="wcp-time"><span class="wcp-time-current"></span><span class="wcp-time-total"></span></div><div class="wcp-button wcp-right wcp-maximize"';
     if (!opts[newid].allowFullscreen) playerbody += ' style="cursor: not-allowed; color: rgba(123,123,123,0.6);"';
-    playerbody += '></div><div class="wcp-button wcp-right wcp-playlist-but"></div><div class="wcp-button wcp-right wcp-subtitle-but"></div></div><div class="wcp-status"></div><div class="wcp-notif"></div><div class="wcp-subtitle-text"></div><div class="wcp-tooltip"><div class="wcp-tooltip-arrow"></div><div class="wcp-tooltip-inner">00:00</div></div><div class="wcp-settings-but"><i class="wcp-settings-icon"></i></div></div>';
+    playerbody += '></div><div class="wcp-button wcp-right wcp-playlist-but"></div><div class="wcp-button wcp-right wcp-subtitle-but"></div></div><div class="wcp-status"></div><div class="wcp-notif"></div><div class="wcp-subtitle-text"></div><div class="wcp-tooltip"><div class="wcp-tooltip-arrow"></div><div class="wcp-tooltip-inner">00:00</div></div><div class="wcp-settings-but"><i class="wcp-settings-icon"></i></div><div class="wcp-center wcp-dlna-buttons"><div style="height: 174px"></div><div class="wcp-dlna-button wcp-dlna-rescan" style="margin-right: 11px">Rescan</div><div class="wcp-dlna-button wcp-dlna-devices">Known Devices</div></div></div>';
     
     opts[newid].currentSub = 0;
     opts[newid].trackSub = -1;
@@ -381,6 +381,28 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         window.chooseFile('#subtitleDialog');
     });
 	
+	wjs(newid).wrapper.find(".wcp-dlna-rescan").click(function() {
+        wjsPlayer = getContext(this);
+        window.findDlnaClient();
+		wjsPlayer.find(".wcp-subtitle-text").html("");
+        var wjsContext = wjsPlayer.context;
+		opts[wjsContext].currentSub = 0;
+        if (opts[wjsContext].splashInterval1) {
+            resetLogo();
+            clearInterval(opts[wjsContext].splashInterval1);
+            clearInterval(opts[wjsContext].splashInterval2);
+            clearInterval(opts[wjsContext].splashInterval3);
+        }
+        opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
+        opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
+        opts[wjsContext].splashInterval3 = setInterval(function() { logoAnim(); },2700);
+    });
+	
+	wjs(newid).wrapper.find(".wcp-dlna-devices").click(function() {
+        wjsPlayer = getContext(this);
+        showDlnaDevices.call(wjsPlayer);
+    });
+	
     wjs(newid).wrapper.find(".wcp-menu-close").click(function() {
         wjsPlayer = getContext(this);
         if (wjsPlayer.find(".wcp-playlist").is(":visible")) {
@@ -396,6 +418,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             wjsPlayer.find(".wcp-folder-menu").hide(0);
         } else if (wjsPlayer.find(".wcp-encodings-menu").is(":visible")) {
             wjsPlayer.find(".wcp-encodings-menu").hide(0);
+        } else if (wjsPlayer.find(".wcp-dlna-clients-menu").is(":visible")) {
+            wjsPlayer.find(".wcp-dlna-clients-menu").hide(0);
         }
     });
     
@@ -1732,6 +1756,7 @@ function isPlaying() {
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
     if (style.display !== 'none') this.find(".wcp-status").fadeOut(1200);
+	if (wjsPlayer.find(".wcp-dlna-buttons").is(":visible")) wjsPlayer.find(".wcp-dlna-buttons").hide(0);
 }
 
 function hasEnded() {
@@ -1865,6 +1890,7 @@ function showPlaylist() {
         else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
         else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
 	    else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
+		else if (this.find(".wcp-dlna-clients-menu").is(":visible")) this.find(".wcp-dlna-clients-menu").hide(0);
         this.find(".wcp-playlist").show(0);
         printPlaylist.call(this);
     }
@@ -1885,8 +1911,22 @@ function showEncodings() {
         else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
         else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
 		else if (this.find(".wcp-playlist").is(":visible")) this.find(".wcp-playlist").hide(0);
+		else if (this.find(".wcp-dlna-clients-menu").is(":visible")) this.find(".wcp-dlna-clients-menu").hide(0);
 		this.find(".wcp-encodings-menu").show(0);
         printEncodings.call(this);
+    }
+}
+
+function showDlnaDevices() {
+    if (!this.find(".wcp-dlna-clients-menu").is(":visible")) {
+        if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
+        else if (this.find(".wcp-settings-menu").is(":visible")) this.find(".wcp-settings-menu").hide(0);
+        else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
+        else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
+		else if (this.find(".wcp-playlist").is(":visible")) this.find(".wcp-playlist").hide(0);
+		else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
+		this.find(".wcp-dlna-clients-menu").show(0);
+        printDlnaClients.call(this);
     }
 }
 
@@ -1912,6 +1952,7 @@ function showSettings() {
     else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
     else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
     else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
+	else if (this.find(".wcp-dlna-clients-menu").is(":visible")) this.find(".wcp-dlna-clients-menu").hide(0);
     if (!this.find(".wcp-settings-menu").is(":visible")) {
         this.find(".wcp-settings-menu").show(0);
         printSettings.call(this);
@@ -1931,6 +1972,7 @@ function showSubtitles() {
         else if (this.find(".wcp-sleep-menu").is(":visible")) this.find(".wcp-sleep-menu").hide(0);
         else if (this.find(".wcp-folder-menu").is(":visible")) this.find(".wcp-folder-menu").hide(0);
 	    else if (this.find(".wcp-encodings-menu").is(":visible")) this.find(".wcp-encodings-menu").hide(0);
+		else if (this.find(".wcp-dlna-clients-menu").is(":visible")) this.find(".wcp-dlna-clients-menu").hide(0);
         this.find(".wcp-subtitles").show(0);
         printSubtitles.call(this);
     }
@@ -2200,7 +2242,7 @@ function printEncodings() {
     settingsItems.html("");
     settingsItems.html(generatePlaylist);
     
-    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-sleep-item").css("height")))) {
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-encodings-item").css("height")))) {
         settingsItems.css("cursor","pointer");
     } else settingsItems.css("cursor","default");
     
@@ -2212,6 +2254,64 @@ function printEncodings() {
 		if (wjsPlayer.subTrack() > 0) wjsPlayer.notify("Reloaded Subtitle");
 		else wjsPlayer.notify("Encoding Saved");
 		wjsPlayer.subTrack(wjsPlayer.subTrack());
+    });
+}
+
+function printDlnaClients() {
+    wjsPlayer = this;
+    settingsItems = this.find(".wcp-dlna-clients-items");
+
+    generatePlaylist = "";
+    oi = 0;
+	
+	if (window.localStorage.lastDlna) {
+		generatePlaylist += '<li class="wcp-menu-item wcp-dlna-clients-item" data-item="'+window.localStorage.lastDlna+'">'+window.localStorage.lastDlna+' (Last Used)</li>';
+		oi++;
+	}
+	
+	oldClients = JSON.parse(window.localStorage.dlnaClients);
+	var voteClients = [];
+	for (var k in oldClients) if (oldClients.hasOwnProperty(k)) {
+		if (!window.localStorage.lastDlna || k != window.localStorage.lastDlna) {
+			oldClients[k] = oldClients[k] +1;
+			voteClients.push([k,oldClients[k]]);
+		}
+	}
+	
+	if (voteClients.length > 0) {
+		var perfect = false;
+		while (!perfect) {
+			perfect = true;
+			for (ij = 0; voteClients[ij]; ij++) {
+				if (ij +1 < voteClients.length && voteClients[ij][1] < voteClients[ij+1][1]) {
+					perfect = false;
+					var tempClient = voteClients[ij];
+					voteClients[ij] = voteClients[ij+1];
+					voteClients[ij+1] = tempClient;
+				}
+			}
+		}
+	}
+	
+	voteClients.forEach(function(el,ij) {
+        generatePlaylist += '<li class="wcp-menu-item wcp-dlna-clients-item" data-item="'+el[0]+'">'+el[0];
+		if (ij == 0) generatePlaylist += ' (Most Used)';
+		generatePlaylist += '</li>';
+        oi++;
+	});
+
+    settingsItems.html("");
+    settingsItems.html(generatePlaylist);
+    
+    if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-dlna-clients-item").css("height")))) {
+        settingsItems.css("cursor","pointer");
+    } else settingsItems.css("cursor","default");
+    
+    wjsPlayer.find(".wcp-dlna-clients-item").click(function() {
+		window.dlna.clients[0] = $(this).data("item");
+		window.findMyIp();
+		wjsPlayer = getContext(this);
+		$(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
     });
 }
 
@@ -2274,8 +2374,8 @@ function printSettings() {
         $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
         window.findDlnaClient();
 		wjsPlayer.find(".wcp-subtitle-text").html("");
-		opts[wjsPlayer.context].currentSub = 0;
         var wjsContext = wjsPlayer.context;
+		opts[wjsContext].currentSub = 0;
         opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
         opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
         opts[wjsContext].splashInterval3 = setInterval(function() { logoAnim(); },2700);
