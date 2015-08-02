@@ -170,7 +170,7 @@ wjs.prototype.playItem = function(i) {
     return this;
 }
 
-wjs.prototype.stop = function() {
+wjs.prototype.stop = function(ignoreButtons) {
     wjsButton = this.find(".wcp-pause");
     if (wjsButton.length != 0) wjsButton.removeClass("wcp-pause").addClass("wcp-play");
 
@@ -182,10 +182,12 @@ wjs.prototype.stop = function() {
     positionChanged.call(this,0);
     this.find(".wcp-time-current").text("");
     this.find(".wcp-time-total").text("");
-	opts[this.context].setSingle = true;
-    vlcs[this.context].vlc.playlist.mode = vlcs[this.context].vlc.playlist.Normal;
-	this.find(".wcp-prev").hide(0);
-	this.find(".wcp-next").hide(0);
+	if (!ignoreButtons) {
+		opts[this.context].setSingle = true;
+		vlcs[this.context].vlc.playlist.mode = vlcs[this.context].vlc.playlist.Normal;
+		this.find(".wcp-prev").hide(0);
+		this.find(".wcp-next").hide(0);
+	}
     return this;
 }
 
@@ -1596,6 +1598,9 @@ function timePassed(t) {
 		opts[this.context].setSingle = false;
 	}
 	if (t > 0 && t < 1000 && this.find(".wcp-replay").length > 0) {
+		if (this.zoom() == 0) this.zoom(1);
+		if (this.length() && this.find(".wcp-time-total").text() == "") this.find(".wcp-time-total").text(" / "+this.parseTime(this.length()));
+
         switchClass(this.find(".wcp-replay"),"wcp-replay","wcp-pause");
         if (this.currentItem() == 0 && this.itemCount() > 0) {
             this.find(".wcp-prev").show(0);
@@ -1657,22 +1662,25 @@ function isOpening() {
 }
 
 function isMediaChanged() {
-    opts[this.context].currentSub = 0;
-    opts[this.context].subtitles = [];
-
-    this.find(".wcp-subtitle-text").html("");
-    if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
-    this.find(".wcp-subtitle-but").hide(0);
-    
-    if (window.win.title != this.itemDesc(this.currentItem()).title) {
-        window.win.title = this.itemDesc(this.currentItem()).title;
-		window.winTitleLeft(this.itemDesc(this.currentItem()).title);
-    }
-    
-    opts[this.context].firstTime = true;
+	if (!window.waitForNext) {
+		opts[this.context].currentSub = 0;
+		opts[this.context].subtitles = [];
+	
+		this.find(".wcp-subtitle-text").html("");
+		if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
+		this.find(".wcp-subtitle-but").hide(0);
+		
+		if (window.win.title != this.itemDesc(this.currentItem()).title) {
+			window.win.title = this.itemDesc(this.currentItem()).title;
+			window.winTitleLeft(this.itemDesc(this.currentItem()).title);
+		}
+		
+		opts[this.context].firstTime = true;
+	}
 }
 
 function isBuffering(percent) {
+    if (this.find(".wcp-splash-screen").is(":visible")) return;
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
         if (stopForce && percent == 100) {
             stopForce = false;
