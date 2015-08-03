@@ -650,6 +650,12 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             isMediaChanged.call(wjsPlayer);
             if (!wjsPlayer.find(".wcp-splash-screen").is(":visible") && !wjsPlayer.isLocal()) {
                 wjsPlayer.find(".wcp-splash-screen").show(0);
+				if (opts[i].splashInterval1) {
+					resetLogo();
+					clearInterval(opts[i].splashInterval1);
+					clearInterval(opts[i].splashInterval2);
+					clearInterval(opts[i].splashInterval3);
+				}
                 opts[i].splashInterval1 = setInterval(function() { logoAnim(); },1000);
                 opts[i].splashInterval2 = setInterval(function() { logoAnim(); },1600);
                 opts[i].splashInterval3 = setInterval(function() { logoAnim(); },2700);
@@ -2384,6 +2390,12 @@ function printSettings() {
 		wjsPlayer.find(".wcp-subtitle-text").html("");
         var wjsContext = wjsPlayer.context;
 		opts[wjsContext].currentSub = 0;
+        if (opts[wjsContext].splashInterval1) {
+            resetLogo();
+            clearInterval(opts[wjsContext].splashInterval1);
+            clearInterval(opts[wjsContext].splashInterval2);
+            clearInterval(opts[wjsContext].splashInterval3);
+        }
         opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
         opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
         opts[wjsContext].splashInterval3 = setInterval(function() { logoAnim(); },2700);
