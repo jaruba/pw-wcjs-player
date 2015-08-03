@@ -203,7 +203,7 @@ wjs.prototype.next = function() {
         }
         if (noDisabled) return false;
         
-        this.playItem(wjsPlayer.currentItem()+1);
+        this.playItem(i);
 
         return this;
     } else return false;
@@ -221,7 +221,7 @@ wjs.prototype.prev = function() {
         }
         if (noDisabled) return false;
 
-        this.playItem(this.currentItem()-1);
+        this.playItem(i);
         
         return this;
     } else return false;
