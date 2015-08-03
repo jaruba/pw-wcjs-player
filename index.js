@@ -2598,7 +2598,13 @@ function attachHotkeys() {
             }
         }
     });
-    dispatcher.on('ctrl + s',function() {
+    dispatcher.on('shift + up',function() {
+		var subPos = parseInt($(".wcp-subtitle-text").css("bottom"));
+		if (subPos < 200) $(".wcp-subtitle-text").css("bottom",(subPos+5)+"px");
+	}).on('shift + down',function() {
+		var subPos = parseInt($(".wcp-subtitle-text").css("bottom"));
+		if (subPos > 0) $(".wcp-subtitle-text").css("bottom",(subPos-5)+"px");
+	}).on('ctrl + s',function() {
 		window.scanServer();
 	}).on('ctrl + d',function() {
 		window.win.showDevTools();
