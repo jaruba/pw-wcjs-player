@@ -153,6 +153,7 @@ wjs.prototype.playItem = function(i) {
             
             opts[this.context].keepHidden = true;
             this.zoom(0);
+			this.renderer.clearCanvas();
             
             wjsButton = this.find(".wcp-play");
             if (wjsButton.length != 0) wjsButton.removeClass("wcp-play").addClass("wcp-pause");
@@ -618,16 +619,6 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         return function(width, height, pixelFormat, videoFrame) {
             vlcs[i].events.emit('FrameSetup', width, height, pixelFormat, videoFrame);
             
-            splashScreen = players[i].find(".wcp-splash-screen");
-            if (splashScreen.is(":visible")) {
-                if (window.stopPrebuf) window.stopPrebuf = false;
-                splashScreen.hide(0);
-                if (opts[i] && opts[i].splashInterval1) {
-                    clearInterval(opts[i].splashInterval1);
-                    clearInterval(opts[i].splashInterval2);
-                    clearInterval(opts[i].splashInterval3);
-                }
-            }
             singleResize.call(players[i], width, height, pixelFormat, videoFrame);
         }
     }(newid));
@@ -754,6 +745,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             }
             opts[i].keepHidden = true;
             players[i].zoom(0);
+			this.renderer.clearCanvas();
 
             allowSleep();
         }
@@ -1109,6 +1101,7 @@ wjs.prototype.currentItem = function(i) {
                 }
                 opts[this.context].keepHidden = true;
                 this.zoom(0);
+				this.renderer.clearCanvas();
                 
                 wjsButton = this.find(".wcp-play");
                 if (wjsButton.length != 0) wjsButton.removeClass("wcp-play").addClass("wcp-pause");
@@ -1535,8 +1528,11 @@ wjs.prototype.showSplashScreen = function() {
 }
 
 wjs.prototype.hideSplashScreen = function() {
-    if (this.find(".wcp-splash-screen").is(":visible")) {
-        this.find(".wcp-splash-screen").hide(0);
+	splashScreen = this.find(".wcp-splash-screen");
+    if (splashScreen.is(":visible")) {
+		if (window.stopPrebuf) window.stopPrebuf = false;
+        splashScreen.hide(0);
+		if (this.zoom() == 0) this.zoom(1);
         if (opts[this.context].splashInterval1) {
             clearInterval(opts[this.context].splashInterval1);
             clearInterval(opts[this.context].splashInterval2);
@@ -1686,7 +1682,10 @@ function isMediaChanged() {
 }
 
 function isBuffering(percent) {
-    if (this.find(".wcp-splash-screen").is(":visible")) return;
+	if (this.find(".wcp-splash-screen").is(":visible")) {
+		if (percent == 100) this.hideSplashScreen();
+		return;
+	}
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
         if (stopForce && percent == 100) {
             stopForce = false;
@@ -1726,7 +1725,7 @@ function isPlaying() {
         }
         opts[this.context].firstTime = false;
         
-        this.hideSplashScreen();
+//        this.hideSplashScreen();
         
         if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
         opts[this.context].currentSub = 0;
@@ -1776,6 +1775,7 @@ function isPlaying() {
 function hasEnded() {
     opts[this.context].keepHidden = true;
     this.zoom(0);
+	this.renderer.clearCanvas();
     switchClass(this.find(".wcp-pause"),"wcp-pause","wcp-replay");
     if (this.time() > 0) {
         if (opts[this.context].lastPos < 0.95) {
