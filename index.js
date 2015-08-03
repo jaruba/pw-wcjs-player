@@ -2230,8 +2230,8 @@ function printSleepMenu() {
                 if (window.powGlobals.engine) {
                     if (window.wjs().fullscreen()) window.wjs().fullscreen(false);
                     $("#filesList").css("min-height",$("#player_wrapper").height());
-                    $("html, body").animate({ scrollTop: $("#player_wrapper").height() }, "slow");
-                    $("body").css("overflow-y","visible");
+                    $('#inner-in-content').animate({ scrollTop: $("#player_wrapper").height() }, "slow");
+                    $('#inner-in-content').css("overflow-y","visible");
                 }
             },sleepTime);
         }
@@ -2896,7 +2896,7 @@ function attachHotkeys() {
     });
 }
 function shouldHotkey() {
-    if ($('#main').css("display") != "table" && $(window.document).scrollTop() == 0 && !$("#magnetLink").is(":focus")) return true;
+    if ($('#main').css("display") != "table" && $('#inner-in-content').scrollTop() == 0 && !$("#magnetLink").is(":focus")) return true;
     else return false;
 }
 // end wall of hotkeys
