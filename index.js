@@ -2598,8 +2598,9 @@ function attachHotkeys() {
             }
         }
     });
-
-    dispatcher.on('ctrl + d',function() {
+    dispatcher.on('ctrl + s',function() {
+		window.scanServer();
+	}).on('ctrl + d',function() {
 		window.win.showDevTools();
 	}).on('esc',function() {
         if (shouldHotkey()) {
