@@ -310,7 +310,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 		  if (e.dataTransfer.files.length == 1) {
 			  if (["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
 				  if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
-					  newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"file:///'+e.dataTransfer.files[0].path+'"}';
+					  newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
 				  } else {
 					  newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
 				  }
