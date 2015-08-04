@@ -2929,7 +2929,7 @@ function calcFontSize(wjsPlayer) {
         if (fontSize > 31) fontSize = 31;
     } else if (wjsPlayer.wrapper.width() > 1600) {
         fontSize = ((wjsPlayer.wrapper.width() - 1600) / 35.5) +31;
-    }
+    } else fontSize = 20;
     return fontSize;
 }
 function resetLogo() {
