@@ -584,13 +584,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     });
     
     // set initial status message font size
-    if (wjs(newid).wrapper.width() <= 220) fontSize = 5;
-    else if (wjs(newid).wrapper.width() > 220 && wjs(newid).wrapper.width() <= 982) fontSize = ((wjs(newid).wrapper.width() -220) /40) +9;
-    else fontSize = wjs(newid).wrapper.height()/15;
+	fontSize = calcFontSize(wjs(newid));
 
-    if (fontSize < 16) fontSize = 16;
-    else if (fontSize > 31) fontSize = 31;
-    
     wjs(newid).wrapper.find(".wcp-status").css('fontSize', fontSize);
     wjs(newid).wrapper.find(".wcp-notif").css('fontSize', fontSize);
     wjs(newid).wrapper.find(".wcp-subtitle-text").css('fontSize', (fontSize*subSize));
@@ -1864,12 +1859,7 @@ function autoResize() {
         wjsPlayer = getContext(obj);
         if (wjsPlayer.wrapper[0]) {
             // resize status font size
-            if (wjsPlayer.wrapper.width() <= 220) fontSize = 5;
-            else if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
-            else fontSize = wjsPlayer.wrapper.height()/15;
-
-            if (fontSize < 16) fontSize = 16;
-            else if (fontSize > 31) fontSize = 31;
+			fontSize = calcFontSize(wjsPlayer);
 
             wjsPlayer.find(".wcp-status").css('fontSize', fontSize);
             wjsPlayer.find(".wcp-notif").css('fontSize', fontSize);
@@ -2836,16 +2826,8 @@ function attachHotkeys() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
             subSize = subSize+0.05;
-            
-            if (wjsPlayer.wrapper.width() <= 220) fontSize = 5;
-            else if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
-            else fontSize = wjsPlayer.wrapper.height()/15;
-        
-            if (fontSize < 16) fontSize = 16;
-            else if (fontSize > 31) fontSize = 31;
-            
+			fontSize = calcFontSize(wjsPlayer);
             wjsPlayer.wrapper.find(".wcp-subtitle-text").css('fontSize', (fontSize*subSize));
-            
             wjsPlayer.notify("Subtitle Size: "+Math.round(subSize*100)+"%");
         }
     }).on('alt + down',function() {
@@ -2853,14 +2835,7 @@ function attachHotkeys() {
             if ((subSize-0.05) >= 0) {
                 wjsPlayer = players[wjsContext];
                 subSize = subSize-0.05;
-                
-                if (wjsPlayer.wrapper.width() <= 220) fontSize = 5;
-                else if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
-                else fontSize = wjsPlayer.wrapper.height()/15;
-            
-                if (fontSize < 16) fontSize = 16;
-                else if (fontSize > 31) fontSize = 31;
-                
+				fontSize = calcFontSize(wjsPlayer);
                 wjsPlayer.wrapper.find(".wcp-subtitle-text").css('fontSize', (fontSize*subSize));
             }
             wjsPlayer.notify("Subtitle Size: "+Math.round(subSize*100)+"%");
@@ -2945,6 +2920,18 @@ wjs.prototype.delayTime=function(t,d){
 }
 
 // this is just junk..
+function calcFontSize(wjsPlayer) {
+    if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) {
+        fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
+        if (fontSize < 16) fontSize = 16;
+    } else if (wjsPlayer.wrapper.width() > 982 && wjsPlayer.wrapper.width() <= 1600) {
+        fontSize = wjsPlayer.wrapper.height()/15;
+        if (fontSize > 31) fontSize = 31;
+    } else if (wjsPlayer.wrapper.width() > 1600) {
+        fontSize = ((wjsPlayer.wrapper.width() - 1600) / 35.5) +31;
+    }
+	return fontSize;
+}
 function resetLogo() {
     $(".wcp-logo-ball").animate({ "width": 8, "height": 8, "borderRadius": 4 },500);
 }
