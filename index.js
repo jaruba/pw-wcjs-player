@@ -859,6 +859,7 @@ wjs.prototype.addPlaylist = function(playlist) {
               }
               if (typeof playlist[item].subtitles !== 'undefined') playerSettings.subtitles = playlist[item].subtitles;
               if (Object.keys(playerSettings).length > 0) this.vlc.playlist.items[this.itemCount()-1].setting = JSON.stringify(playerSettings);
+			  if (playlist[item].disabled) this.vlc.playlist.items[this.itemCount()-1].disabled = true;
           }
      }
 
