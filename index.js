@@ -2447,8 +2447,10 @@ function loadSubtitle(subtitleElement) {
     if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org" && window.osCookie) {
         callOpts.headers = { 'cookie': window.osCookie };
     } else if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org") {
-        if (altSub)    {
+        if (altSub) {
+			window.pauseFlood();
             retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
+				window.startFlood();
                 processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
             },{ charset: window.localStorage.subEncoding });
         } else this.notify("Subtitle Error");
@@ -2461,16 +2463,21 @@ function loadSubtitle(subtitleElement) {
     }
     resData = "";
 
+	window.pauseFlood();
     var req = http.request(callOpts,function(res) {
         if ([501,404].indexOf(res.statusCode) > -1) {
             if (altSub)    {
                 retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
+					window.startFlood();
                     processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
                 },{ charset: window.localStorage.subEncoding });
             } else wjsPlayer.notify("Subtitle Error");
         } else {
             res.on('data', function (data) { resData += data; });
-            res.on('end', function() { processSub.call(wjsPlayer,resData,subtitleElement.split('.').pop()); });
+            res.on('end', function() {
+                window.startFlood();
+                processSub.call(wjsPlayer,resData,subtitleElement.split('.').pop());
+			});
         }
     });
     req.end();
