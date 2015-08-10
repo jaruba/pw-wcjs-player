@@ -2419,7 +2419,7 @@ function printSettings() {
     });
     wjsPlayer.find(".close-powder-set").click(function() {
         $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
-        window.win.close()
+        window.closeProcedure()
     });
 }
 
