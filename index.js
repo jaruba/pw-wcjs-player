@@ -295,6 +295,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     var holder = window.document.getElementById('player_wrapper');
     holder.ondragover = function () {
+		players["#"+$(this).find(".wcp-wrapper").attr("id")].notify("Drop to Add File");
         $(this).addClass('wcp-drag-hover');
         return false;
     };
