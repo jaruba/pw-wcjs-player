@@ -280,7 +280,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     $(this.context).each(function(ij,el) { if (!$(el).hasClass("webchimeras")) $(el).addClass("webchimeras"); el.innerHTML = playerbody; });
     
-//    $(".wcp-subtitle-but").hide(0);
+    $(".wcp-subtitle-but").hide(0);
     $(".wcp-status").hide(0);
     
     if (vlcs[newid].multiscreen) {
