@@ -295,7 +295,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     var holder = window.document.getElementById('player_wrapper');
     holder.ondragover = function () {
-		players["#"+$(this).find(".wcp-wrapper").attr("id")].notify("Drop to Add File");
+        players["#"+$(this).find(".wcp-wrapper").attr("id")].notify("Drop to Add File");
         $(this).addClass('wcp-drag-hover');
         return false;
     };
@@ -853,7 +853,7 @@ wjs.prototype.addPlaylist = function(playlist) {
                   if (item == 0) opts[this.context].zoom = playlist[item].zoom;
                   playerSettings.zoom = playlist[item].zoom;
               }
-			  if (typeof playlist[item].defaultSub !== 'undefined') playerSettings.defaultSub = playlist[item].defaultSub;
+              if (typeof playlist[item].defaultSub !== 'undefined') playerSettings.defaultSub = playlist[item].defaultSub;
               if (typeof playlist[item].subtitles !== 'undefined') playerSettings.subtitles = playlist[item].subtitles;
               if (Object.keys(playerSettings).length > 0) this.vlc.playlist.items[this.itemCount()-1].setting = JSON.stringify(playerSettings);
               if (playlist[item].disabled) this.vlc.playlist.items[this.itemCount()-1].disabled = true;
@@ -947,7 +947,7 @@ wjs.prototype.subTrack = function(newTrack) {
                     opts[this.context].subtitles = [];
                     
                     if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
-					if (this.vlc.subtitles.count > 0) newSub = newTrack - this.vlc.subtitles.count +1;
+                    if (this.vlc.subtitles.count > 0) newSub = newTrack - this.vlc.subtitles.count +1;
                     else newSub = newTrack - this.vlc.subtitles.count;
                     
                     itemSubtitles = this.itemDesc(this.currentItem()).setting.subtitles;
@@ -1684,7 +1684,7 @@ function isBuffering(percent) {
         return;
     }
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
-		if (window.controlPort && window.controlSecret && window.controllSocket) window.controllSocket.emit('event', { name: 'Buffering', value: percent });
+        if (window.controlPort && window.controlSecret && window.controllSocket) window.controllSocket.emit('event', { name: 'Buffering', value: percent });
         if (stopForce && percent == 100) {
             stopForce = false;
             forceProgress = -1;
@@ -1761,12 +1761,12 @@ function isPlaying() {
         
         if (this.itemDesc(this.currentItem()).setting.defaultSub) {
             for (gvn = 1; gvn < this.subCount(); gvn++) {
-	            if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
+                if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
                     this.subTrack(gvn);
                     break;
                 }
             }
-		} else {
+        } else {
             if (opts[this.context].setSub) {
                 this.subTrack(opts[this.context].setSub);
                 delete opts[this.context].setSub;
@@ -2458,9 +2458,9 @@ function loadSubtitle(subtitleElement) {
         callOpts.headers = { 'cookie': window.osCookie };
     } else if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org") {
         if (altSub) {
-			window.pauseFlood();
+            window.pauseFlood();
             retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
-				window.startFlood();
+                window.startFlood();
                 processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
             },{ charset: window.localStorage.subEncoding });
         } else this.notify("Subtitle Error");
@@ -2473,12 +2473,12 @@ function loadSubtitle(subtitleElement) {
     }
     resData = "";
 
-	window.pauseFlood();
+    window.pauseFlood();
     var req = http.request(callOpts,function(res) {
         if ([501,404].indexOf(res.statusCode) > -1) {
             if (altSub)    {
                 retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
-					window.startFlood();
+                    window.startFlood();
                     processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
                 },{ charset: window.localStorage.subEncoding });
             } else wjsPlayer.notify("Subtitle Error");
@@ -2487,7 +2487,7 @@ function loadSubtitle(subtitleElement) {
             res.on('end', function() {
                 window.startFlood();
                 processSub.call(wjsPlayer,resData,subtitleElement.split('.').pop());
-			});
+            });
         }
     });
     req.end();
