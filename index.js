@@ -853,6 +853,7 @@ wjs.prototype.addPlaylist = function(playlist) {
                   if (item == 0) opts[this.context].zoom = playlist[item].zoom;
                   playerSettings.zoom = playlist[item].zoom;
               }
+			  if (typeof playlist[item].defaultSub !== 'undefined') playerSettings.defaultSub = playlist[item].defaultSub;
               if (typeof playlist[item].subtitles !== 'undefined') playerSettings.subtitles = playlist[item].subtitles;
               if (Object.keys(playerSettings).length > 0) this.vlc.playlist.items[this.itemCount()-1].setting = JSON.stringify(playerSettings);
               if (playlist[item].disabled) this.vlc.playlist.items[this.itemCount()-1].disabled = true;
@@ -945,10 +946,9 @@ wjs.prototype.subTrack = function(newTrack) {
                     this.find(".wcp-subtitle-text").html("");
                     opts[this.context].subtitles = [];
                     
-                    if (this.vlc.subtitles.track > 0) {
-                        this.vlc.subtitles.track = 0;
-                        newSub = newTrack - this.vlc.subtitles.count +1;
-                    } else newSub = newTrack - this.vlc.subtitles.count;
+                    if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
+					if (this.vlc.subtitles.count > 0) newSub = newTrack - this.vlc.subtitles.count +1;
+                    else newSub = newTrack - this.vlc.subtitles.count;
                     
                     itemSubtitles = this.itemDesc(this.currentItem()).setting.subtitles;
                     for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
@@ -1684,6 +1684,7 @@ function isBuffering(percent) {
         return;
     }
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
+		if (window.controlPort && window.controlSecret && window.controllSocket) window.controllSocket.emit('event', { name: 'Buffering', value: percent });
         if (stopForce && percent == 100) {
             stopForce = false;
             forceProgress = -1;
@@ -1758,11 +1759,19 @@ function isPlaying() {
 //        if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
         this.find(".wcp-subtitle-but").show(0);
         
-        if (opts[this.context].setSub) {
-            this.subTrack(opts[this.context].setSub);
-            delete opts[this.context].setSub;
+        if (this.itemDesc(this.currentItem()).setting.defaultSub) {
+            for (gvn = 1; gvn < this.subCount(); gvn++) {
+	            if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
+                    this.subTrack(gvn);
+                    break;
+                }
+            }
+		} else {
+            if (opts[this.context].setSub) {
+                this.subTrack(opts[this.context].setSub);
+                delete opts[this.context].setSub;
+            }
         }
-        
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
     if (style.display !== 'none') this.find(".wcp-status").fadeOut(1200);
