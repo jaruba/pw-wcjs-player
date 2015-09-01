@@ -306,7 +306,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     holder.ondrop = function (nid) {
         return function(e) {
           e.preventDefault();
-          window.win.focus();
+          window.win.gui.focus();
           
           if (e.dataTransfer.files.length == 1) {
               if (["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
@@ -316,7 +316,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                       newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
                   }
                 newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
-                if (window.IsJsonString(newSettings)) {
+                if (window.utils.isJsonString(newSettings)) {
                     newSettings = JSON.parse(newSettings);
                     if (newSettings.subtitles) {
                         oldString = JSON.stringify(newSettings.subtitles);
@@ -328,13 +328,13 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                 players[nid].subTrack(players[nid].subCount()-1);
                 players[nid].notify("Subtitle Loaded");
               } else {
-                  window.runURL(e.dataTransfer.files[0].path);
+                  window.load.url(e.dataTransfer.files[0].path);
                   players[nid].notify("Added to Playlist");
               }
           } else {
               var newFiles = [];
               for (var i = 0; i < e.dataTransfer.files.length; ++i) newFiles[i] = e.dataTransfer.files[i].path;
-              window.runMultiple(newFiles);
+              window.load.multiple(newFiles);
               players[nid].notify("Added to Playlist");
           }
           
@@ -363,18 +363,18 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         }(newid));
     }
     
-    wjs(newid).wrapper.find('.wcp-add-url').click(window.openUrlModal);
+    wjs(newid).wrapper.find('.wcp-add-url').click(window.ui.modals.openUrlModal);
     
     wjs(newid).wrapper.find(".wcp-add-video").click(function() {
         window.chooseFile('#addPlaylistDialog');
     });
     
     wjs(newid).wrapper.find(".wcp-scan-server").click(function() {
-        window.scanServer();
+        window.scan.server();
     });
 
     wjs(newid).wrapper.find(".wcp-scan-library").click(function() {
-        window.scanLibrary();
+        window.scan.library();
     });
 
     wjs(newid).wrapper.find(".wcp-set-encodings").click(function() {
@@ -387,7 +387,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     wjs(newid).wrapper.find(".wcp-dlna-rescan").click(function() {
         wjsPlayer = getContext(this);
-        window.findDlnaClient();
+        window.dlna.findClient();
         wjsPlayer.find(".wcp-subtitle-text").html("");
         var wjsContext = wjsPlayer.context;
         opts[wjsContext].currentSub = 0;
@@ -440,8 +440,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         buttonClass = this.className.replace("wcp-button","").replace("wcp-left","").replace("wcp-vol-button","").replace("wcp-right","").split(" ").join("");
 
         if (["wcp-play","wcp-pause","wcp-replay","wcp-prev","wcp-next"].indexOf(buttonClass) > -1 && wjsPlayer.state() == "stopping") {
-            if (window.castData.casting == 1) return;
-            if (!window.castData.casting && window.dlna.initiated) {
+            if (window.dlna.castData.casting == 1) return;
+            if (!window.dlna.castData.casting && window.dlna.instance.initiated) {
                 wjsPlayer.notify("Unavailable");
                 return;
             }
@@ -479,8 +479,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
 
         if ((window.localStorage.clickPause == "fullscreen" && wjsPlayer.fullscreen()) || window.localStorage.clickPause == "both") {
             if (wjsPlayer.state() == "stopping") {
-                if (!window.castData.casting && window.dlna.initiated) return;
-                if (window.castData.casting == 1) return;
+                if (!window.dlna.castData.casting && window.dlna.instance.initiated) return;
+                if (window.dlna.castData.casting == 1) return;
             }
             if (wjsPlayer.stateInt() == 6) {
                 wjsPlayer.find(".wcp-replay").trigger("click");
@@ -516,7 +516,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                     clearTimeout(vlcs[wjsPlayer.context].hideUI);
                     wjsPlayer.wrapper.css({cursor: 'default'});
                     
-                    if (!window.dlna.initiated) {
+                    if (!window.dlna.instance.initiated) {
                         if (window.document.webkitFullscreenElement == null) {
                             if (opts[wjsPlayer.context].titleBar == "both" || opts[wjsPlayer.context].titleBar == "minimized") {
                                 wjsPlayer.find(".wcp-titlebar").stop().show(0);
@@ -695,16 +695,16 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             
             preventSleep();
             if (wjsPlayer.find(".wcp-splash-screen").is(":visible")) {
-                if (!window.powGlobals.engine) {
+				if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
+                    window.stopPrebuf = true;
+                    wjsPlayer.setOpeningText("Opening Video");
+				} else {
                     wjsPlayer.find(".wcp-splash-screen").hide(0);
                     if (opts[i].splashInterval1) {
                         clearInterval(opts[i].splashInterval1);
                         clearInterval(opts[i].splashInterval2);
                         clearInterval(opts[i].splashInterval3);
                     }
-                } else {
-                    window.stopPrebuf = true;
-                    wjsPlayer.setOpeningText("Opening Video");
                 }
             }
         }
@@ -1203,7 +1203,7 @@ wjs.prototype.clearPlaylist = function() {
 }
 
 function progressHoverIn(e) {
-    if (!window.dlna.initiated) {
+    if (!window.dlna.instance.initiated) {
         if (this.vlc.length) {
             var rect = this.wrapper[0].getBoundingClientRect();
             if (e.pageX >= rect.left && e.pageX <= rect.right) {
@@ -1220,10 +1220,10 @@ function progressHoverIn(e) {
             } else this.find(".wcp-tooltip").hide(0);
         }
     } else {
-        if (window.castData.castLength) {
+        if (window.dlna.castData.castLength) {
             var rect = this.wrapper[0].getBoundingClientRect();
             if (e.pageX >= rect.left && e.pageX <= rect.right) {
-                var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+                var newtime = Math.floor(window.dlna.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
@@ -1239,7 +1239,7 @@ function progressHoverIn(e) {
 }
 
 function progressMouseMoved(e) {
-    if (!window.dlna.initiated) {
+    if (!window.dlna.instance.initiated) {
         if (this.vlc.length) {
             var rect = this.wrapper[0].getBoundingClientRect();
             if (e.pageX >= rect.left && e.pageX <= rect.right) {
@@ -1256,10 +1256,10 @@ function progressMouseMoved(e) {
             } else this.find(".wcp-tooltip").hide(0);
         }
     } else {
-        if (window.castData.castLength) {
+        if (window.dlna.castData.castLength) {
             var rect = this.wrapper[0].getBoundingClientRect();
             if (e.pageX >= rect.left && e.pageX <= rect.right) {
-                var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+                var newtime = Math.floor(window.dlna.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
@@ -1291,10 +1291,10 @@ function seekDragEnded(e,wjsMulti) {
         this.find(".wcp-progress-seen").css("width", (p*100)+"%");
         this.find(".wcp-time-current").text(this.find(".wcp-tooltip-inner").text());
 
-        if (!window.dlna.initiated) this.vlc.position = p;
-        else if (window.castData.casting && window.castData.castLength) {
-            window.dlna.controls.seek(parseInt((window.castData.castLength /1000) *p));
-            window.castData.castingPaused = 0;
+        if (!window.dlna.instance.initiated) this.vlc.position = p;
+        else if (window.dlna.castData.casting && window.dlna.castData.castLength) {
+            window.dlna.instance.controls.seek(parseInt((window.dlna.castData.castLength /1000) *p));
+            window.dlna.castData.castingPaused = 0;
             this.setOpeningText("Updating playback position ...");
         }
     }
@@ -1355,8 +1355,8 @@ function seekDragMoved(e,wjsMulti) {
         p = (e.pageX - rect.left) / (rect.right - rect.left);
         this.find(".wcp-progress-seen").css("width", (p*100)+"%");
         vlc = this.vlc;
-        if (window.dlna.initiated && window.castData.casting && window.castData.castLength) {
-            var newtime = Math.floor(window.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
+        if (window.dlna.instance.initiated && window.dlna.castData.casting && window.dlna.castData.castLength) {
+            var newtime = Math.floor(window.dlna.castData.castLength * ((e.pageX - rect.left) / this.wrapper.width()));
         } else {
             var newtime = Math.floor(this.vlc.length * ((e.pageX - rect.left) / this.wrapper.width()));
         }
@@ -1445,7 +1445,7 @@ wjs.prototype.ui = function(newBool) {
         if (newBool === true) {
             if (opts[this.context].uiHidden) {
                 opts[this.context].uiHidden = false;
-                if (!window.dlna.initiated && window.document.webkitFullscreenElement != null) this.find(".wcp-titlebar").stop().show(0);
+                if (!window.dlna.instance.initiated && window.document.webkitFullscreenElement != null) this.find(".wcp-titlebar").stop().show(0);
                 this.find(".wcp-toolbar").stop().show(0);
                 this.find(".wcp-settings-but").stop().show(0);
                 if (this.wrapper.css('cursor') == 'none') this.wrapper.css({cursor: 'default'});
@@ -1661,7 +1661,7 @@ function isOpening() {
 }
 
 function isMediaChanged() {
-    if (!window.waitForNext) {
+    if (!window.playerApi.waitForNext) {
         opts[this.context].currentSub = 0;
         opts[this.context].subtitles = [];
     
@@ -1669,9 +1669,8 @@ function isMediaChanged() {
         if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
         this.find(".wcp-subtitle-but").hide(0);
         
-        if (window.win.title != this.itemDesc(this.currentItem()).title) {
-            window.win.title = this.itemDesc(this.currentItem()).title;
-            window.winTitleLeft(this.itemDesc(this.currentItem()).title);
+        if (window.win.gui.title != this.itemDesc(this.currentItem()).title) {
+            window.win.title.left(this.itemDesc(this.currentItem()).title);
         }
         
         opts[this.context].firstTime = true;
@@ -1684,7 +1683,9 @@ function isBuffering(percent) {
         return;
     }
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
-        if (window.controlPort && window.controlSecret && window.controllSocket) window.controllSocket.emit('event', { name: 'Buffering', value: percent });
+        if (window.remote.port && window.remote.secret && window.remote.socket) {
+			window.remote.socket.emit('event', { name: 'Buffering', value: percent });
+		}
         if (stopForce && percent == 100) {
             stopForce = false;
             forceProgress = -1;
@@ -2026,13 +2027,13 @@ function printPlaylist() {
                 if (plstring != this.itemDesc(oi).title) vlc.playlist.items[oi].title = "[custom]"+plstring;
             }
             generatePlaylist += '<li class="wcp-menu-item wcp-playlist-item';
-            if (window.tempSel > -1) {
-                if (oi == window.tempSel) generatePlaylist += ' wcp-menu-selected';
-            } else if (window.dlna.initiated) {
-                if (oi == window.dlna.lastIndex) generatePlaylist += ' wcp-menu-selected';
+            if (window.playerApi.tempSel > -1) {
+                if (oi == window.playerApi.tempSel) generatePlaylist += ' wcp-menu-selected';
+            } else if (window.dlna.instance.initiated) {
+                if (oi == window.dlna.instance.lastIndex) generatePlaylist += ' wcp-menu-selected';
             } else {
-                if (!window.waitForNext && oi == this.currentItem()) generatePlaylist += ' wcp-menu-selected';
-                else if (window.waitForNext && oi == window.tempSel) generatePlaylist += ' wcp-menu-selected';
+                if (!window.playerApi.waitForNext && oi == this.currentItem()) generatePlaylist += ' wcp-menu-selected';
+                else if (window.playerApi.waitForNext && oi == window.playerApi.tempSel) generatePlaylist += ' wcp-menu-selected';
             }
             if (this.itemDesc(oi).disabled) generatePlaylist += ' wcp-disabled';
             generatePlaylist += '"><img class="wcp-disabler-img" src="'+relbase+'/images/dragger.png" width="6" height="30"><div class="wcp-disabler-hold"><div class="wcp-disabler"><div class="wcp-disabler-dot"></div></div></div>'+this.itemDesc(oi).title+'</li>';
@@ -2063,15 +2064,15 @@ function printPlaylist() {
         });
         this.find(".wcp-playlist-item").click(function() {
             if (!$(this).hasClass("wcp-menu-selected")) {
-                if (window.waitForNext) window.waitForNext = false;
+                if (window.playerApi.waitForNext) window.playerApi.waitForNext = false;
                 wjsPlayer = getContext(this);
                 if (wjsPlayer.itemDesc($(this).index()).disabled) {
                     wjsPlayer.vlc.playlist.items[$(this).index()].disabled = false;
                     $(this).removeClass("wcp-disabled");
                 }
-                if (window.dlna.initiated) {
-                    window.dlna.lastIndex = $(this).index();
-                    window.dlnaPlay($(this).index());
+                if (window.dlna.instance.initiated) {
+                    window.dlna.instance.lastIndex = $(this).index();
+                    window.dlna.play($(this).index());
                     printPlaylist.call(wjsPlayer);
                     return;
                 }
@@ -2100,22 +2101,22 @@ function printPlaylist() {
               getContext(this).advanceItem(swapItems[0],swapItems[1]);
               if (swapItems[1] < 0) {
                   var tmpVideos = [];
-                  window.powGlobals.videos.forEach(function(el,ij) {
-                      if (ij == (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.videos[swapItems[0]];
-                      else if (ij > (swapItems[0] + swapItems[1]) && ij <= swapItems[0]) tmpVideos[ij] = window.powGlobals.videos[ij-1];
+                  window.powGlobals.lists.videos.forEach(function(el,ij) {
+                      if (ij == (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.videos[swapItems[0]];
+                      else if (ij > (swapItems[0] + swapItems[1]) && ij <= swapItems[0]) tmpVideos[ij] = window.powGlobals.lists.videos[ij-1];
                       else tmpVideos[ij] = el;
                   });
-                  setTimeout(function() { window.powGlobals.currentIndex = window.player.currentItem(); },10);
-                  window.powGlobals.videos = tmpVideos;
+                  setTimeout(function() { window.powGlobals.lists.currentIndex = window.player.currentItem(); },10);
+                  window.powGlobals.lists.videos = tmpVideos;
               } else if (swapItems[1] > 0) {
                   var tmpVideos = [];
-                  window.powGlobals.videos.forEach(function(el,ij) {
-                      if (ij == swapItems[0] + swapItems[1]) tmpVideos[ij] = window.powGlobals.videos[swapItems[0]];
-                      else if (ij >= swapItems[0] && ij < (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.videos[ij+1];
+                  window.powGlobals.lists.videos.forEach(function(el,ij) {
+                      if (ij == swapItems[0] + swapItems[1]) tmpVideos[ij] = window.powGlobals.lists.videos[swapItems[0]];
+                      else if (ij >= swapItems[0] && ij < (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.videos[ij+1];
                       else tmpVideos[ij] = el;
                   });
-                  setTimeout(function() { window.powGlobals.currentIndex = window.player.currentItem(); },10);
-                  window.powGlobals.videos = tmpVideos;
+                  setTimeout(function() { window.powGlobals.lists.currentIndex = window.player.currentItem(); },10);
+                  window.powGlobals.lists.videos = tmpVideos;
               }
           }
         });
@@ -2228,7 +2229,7 @@ function printSleepMenu() {
         if (sleepTime > 0) {
             opts[wjsPlayer.context].sleepTimer = setTimeout(function() {
                 if (wjsPlayer.playing()) wjsPlayer.togglePause();
-                if (window.powGlobals.engine) {
+                if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
                     if (window.wjs().fullscreen()) window.wjs().fullscreen(false);
                     $("#filesList").css("min-height",$("#player_wrapper").height());
                     $('#inner-in-content').animate({ scrollTop: $("#player_wrapper").height() }, "slow");
@@ -2323,8 +2324,8 @@ function printDlnaClients() {
     } else settingsItems.css("cursor","default");
     
     wjsPlayer.find(".wcp-dlna-clients-item").click(function() {
-        window.dlna.clients[0] = $(this).data("item");
-        window.findMyIp();
+        window.dlna.instance.clients[0] = $(this).data("item");
+        window.dlna.findMyIp();
         wjsPlayer = getContext(this);
         $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
     });
@@ -2366,9 +2367,9 @@ function printSettings() {
 
     generatePlaylist = "";
     oi = 5;
-    if (window.dlna.initiated) generatePlaylist += '<li class="wcp-menu-item wcp-settings-item dlna-off">Stop Streaming to TV</li>';
+    if (window.dlna.instance.initiated) generatePlaylist += '<li class="wcp-menu-item wcp-settings-item dlna-off">Stop Streaming to TV</li>';
     else generatePlaylist += '<li class="wcp-menu-item wcp-settings-item dlna-on">Stream to TV (DLNA)</li>';
-    if (window.powGlobals.engine) {
+    if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
         generatePlaylist += '<li class="wcp-menu-item wcp-settings-item torrent-data-set">View Torrent Data</li>';
         oi++;
     }
@@ -2387,7 +2388,7 @@ function printSettings() {
     wjsPlayer.find(".dlna-on").click(function() {
         wjsPlayer = getContext(this);
         $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
-        window.findDlnaClient();
+        window.dlna.findClient();
         wjsPlayer.find(".wcp-subtitle-text").html("");
         var wjsContext = wjsPlayer.context;
         opts[wjsContext].currentSub = 0;
@@ -2411,7 +2412,7 @@ function printSettings() {
             clearInterval(opts[wjsContext].splashInterval2);
             clearInterval(opts[wjsContext].splashInterval3);
         }
-        window.stopDlna();
+        window.dlna.stop();
     });
     wjsPlayer.find(".set-sleep-timer").click(function() {
         showSleepMenu.call(wjsPlayer);
@@ -2421,15 +2422,15 @@ function printSettings() {
     });
     wjsPlayer.find(".torrent-data-set").click(function() {
         $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
-        window.torrentData();
+        window.ui.goto.torrentData();
     });
     wjsPlayer.find(".back-to-main-set").click(function() {
         $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
-        window.goBack();
+        window.ui.goto.mainMenu();
     });
     wjsPlayer.find(".close-powder-set").click(function() {
         $(getContext(this).find(".wcp-menu-close")[0]).trigger("click");
-        window.closeProcedure()
+        window.win.closeProcedure()
     });
 }
 
@@ -2454,13 +2455,13 @@ function loadSubtitle(subtitleElement) {
     callOpts = {};
     callOpts.host = subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/"));
     callOpts.path = subtitleElement.replace("http://","").substr(subtitleElement.replace("http://","").indexOf("/"));
-    if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org" && window.osCookie) {
-        callOpts.headers = { 'cookie': window.osCookie };
+    if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org" && window.subtitles.osCookie) {
+        callOpts.headers = { 'cookie': window.subtitles.osCookie };
     } else if (subtitleElement.replace("http://","").substr(0,subtitleElement.replace("http://","").indexOf("/")) == "dl.opensubtitles.org") {
         if (altSub) {
-            window.pauseFlood();
+            window.torrent.flood.pause();
             retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
-                window.startFlood();
+                window.torrent.flood.start();
                 processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
             },{ charset: window.localStorage.subEncoding });
         } else this.notify("Subtitle Error");
@@ -2473,19 +2474,19 @@ function loadSubtitle(subtitleElement) {
     }
     resData = "";
 
-    window.pauseFlood();
+    window.torrent.flood.pause();
     var req = http.request(callOpts,function(res) {
         if ([501,404].indexOf(res.statusCode) > -1) {
             if (altSub)    {
                 retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
-                    window.startFlood();
+                    window.torrent.flood.start();
                     processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
                 },{ charset: window.localStorage.subEncoding });
             } else wjsPlayer.notify("Subtitle Error");
         } else {
             res.on('data', function (data) { resData += data; });
             res.on('end', function() {
-                window.startFlood();
+                window.torrent.flood.start();
                 processSub.call(wjsPlayer,resData,subtitleElement.split('.').pop());
             });
         }
@@ -2613,9 +2614,9 @@ function attachHotkeys() {
         var subPos = parseInt($(".wcp-subtitle-text").css("bottom"));
         if (subPos > 0) $(".wcp-subtitle-text").css("bottom",(subPos-5)+"px");
     }).on('ctrl + s',function() {
-        window.scanServer();
+        window.scan.server();
     }).on('ctrl + d',function() {
-        window.win.showDevTools();
+        window.win.gui.showDevTools();
     }).on('esc',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
@@ -2766,13 +2767,13 @@ function attachHotkeys() {
     }).on('a',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            window.aspectRatios.some(function(el,i) {
+            window.ctxMenu.aspectRatios.some(function(el,i) {
                 if (opts[wjsContext].aspectRatio == el) {
-                    if (i+1 < window.aspectRatios.length) {
-                        window.selectAspect(i+1);
-                        wjsPlayer.notify("Aspect Ratio: "+window.aspectRatios[i+1]);
+                    if (i+1 < window.ctxMenu.aspectRatios.length) {
+                        window.ctxMenu.selectAspect(i+1);
+                        wjsPlayer.notify("Aspect Ratio: "+window.ctxMenu.aspectRatios[i+1]);
                     } else {
-                        window.selectAspect(0);
+                        window.ctxMenu.selectAspect(0);
                         wjsPlayer.notify("Aspect Ratio: Default");
                     }
                     return true;
@@ -2782,13 +2783,13 @@ function attachHotkeys() {
     }).on('c',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            window.crops.some(function(el,i) {
+            window.ctxMenu.crops.some(function(el,i) {
                 if (opts[wjsContext].crop == el) {
-                    if (i+1 < window.crops.length) {
-                        window.selectCrop(i+1);
-                        wjsPlayer.notify("Crop: "+window.crops[i+1]);
+                    if (i+1 < window.ctxMenu.crops.length) {
+                        window.ctxMenu.selectCrop(i+1);
+                        wjsPlayer.notify("Crop: "+window.ctxMenu.crops[i+1]);
                     } else {
-                        window.selectCrop(0);
+                        window.ctxMenu.selectCrop(0);
                         wjsPlayer.notify("Crop: Default");
                     }
                     return true;
@@ -2798,13 +2799,13 @@ function attachHotkeys() {
     }).on('z',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            window.zooms.some(function(el,i) {
+            window.ctxMenu.zooms.some(function(el,i) {
                 if (opts[wjsContext].zoom == el[1]) {
-                    if (i+1 < window.zooms.length) {
-                        window.selectZoom(i+1,window.zooms[i+1][1]);
-                        wjsPlayer.notify("Zoom: "+window.zooms[i+1][0]);
+                    if (i+1 < window.ctxMenu.zooms.length) {
+                        window.ctxMenu.selectZoom(i+1,window.ctxMenu.zooms[i+1][1]);
+                        wjsPlayer.notify("Zoom: "+window.ctxMenu.zooms[i+1][0]);
                     } else {
-                        window.selectZoom(0,window.zooms[0][1]);
+                        window.ctxMenu.selectZoom(0,window.ctxMenu.zooms[0][1]);
                         wjsPlayer.notify("Zoom: Default");
                     }
                     return true;
@@ -2976,8 +2977,6 @@ wjs.prototype.isLocal=function(){if(this.currentItem() > -1 && this.itemDesc(thi
 wjs.prototype.isPlaying=function(){return this.vlc.playing}
 wjs.prototype.setOpeningText=function(newData){this.find(".wcp-opening-text").text(newData);return this}
 wjs.prototype.setDownloaded=function(newData){this.find(".wcp-progress-cache").css("width",(newData*100)+"%");return this}
-wjs.prototype.startPlayer=function(){this.playItem(0);return this}
-wjs.prototype.stopPlayer=function(){this.stop();return this}
 wjs.prototype.audioCount=function(){return this.vlc.audio.count}
 wjs.prototype.itemCount=function(){return this.vlc.playlist.itemCount}
 wjs.prototype.playing=function(){return this.vlc.playing}
