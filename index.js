@@ -38,7 +38,11 @@ var vlcs = {},
     cookie,
     delayedTime,
     supportedLinks = ["youtube.com","video.google.com",".googlevideo.com","vimeo.com","dailymotion.com","dailymotion.co.uk","bbc.co.uk","trailers.apple.com","break.com","canalplus.fr","extreme.com","france2.fr","jamendo.com","koreus.com","lelombrik.net","liveleak.com","metacafe.com","mpora.com","pinkbike.com","pluzz.francetv.fr","rockbox.org","soundcloud.com","zapiks.com","metachannels.com","joox.com"],
-    supportedEncoding = [["Auto Detect","auto"],["Universal (UTF-8)","utf8"],["Universal (UTF-16)","utf16"],["Universal (big endian UTF-16)","UTF-16BE"],["Universal (little endian UTF-16)","utf16le"],["Universal, Chinese (GB18030)","GB18030"],["Western European (Latin-9)","latin9"],["Western European (Windows-1252)","windows1252"],["Western European (IBM 00850)","ibm850"],["Eastern European (Latin-2)","latin2"],["Eastern European (Windows-1250)","windows1250"],["Esperanto (Latin-3)","latin3"],["Nordic (Latin-6)","latin6"],["Cyrillic (Windows-1251)","windows1251"],["Russian (KOI8-R)","koi8-ru"],["Ukranian (KOI8-U)","koi8-u"],["Arabic (ISO 8859-6)","ISO-8859-6"],["Arabic (Windows-1256)","windows1256"],["Greek (ISO 8859-7)","ISO-8859-7"],["Greek (Windows-1253)","windows1253"],["Hebrew (ISO 8859-8)","ISO-8859-8"],["Hebrew (Windows-1255)","windows1255"],["Turkish (ISO 8859-9)","ISO-8859-9"],["Turkish (Windows-1254)","windows1254"],["Thai (TIS 620-2533/ISO 8859-11)","ISO-8859-11"],["Thai (Windows-874)","windows874"],["Baltic (Latin-7)","latin7"],["Baltic (Windows-1257)","windows1257"],["Celtic (Latin-8)","latin8"],["South-Eastern European (Latin-10)","latin10"],["Simplified Chinese (ISO-2022-CN-EXT)","ISO-2022-CN-EXT"],["Simplified Chinese Unix (EUC-CN)","EUC-CN"],["Japanese (7-bits JIS/ISO-2022-JP-2)","ISO-2022-JP-2"],["Japanese Unix (EUC-JP)","EUC-JP"],["Japanese (Shift JIS)","Shift_JIS"],["Korean (EUC-KR/CP949)","EUC-KR"],["Korean (ISO-2022-KR)","ISO-2022-KR"],["Traditional Chinese (Big5)","Big5"],["Traditional Chinese Unix (EUC-TW)","EUC-TW"],["Hong-Kong Supplementary (HKSCS)","Big5-HKSCS"],["Vietnamese (VISCII)","viscii"],["Vietnamese (Windows-1258)","windows1258"]];
+    supportedEncoding = [["Auto Detect","auto"],["Universal (UTF-8)","utf8"],["Universal (UTF-16)","utf16"],["Universal (big endian UTF-16)","UTF-16BE"],["Universal (little endian UTF-16)","utf16le"],["Universal, Chinese (GB18030)","GB18030"],["Western European (Latin-9)","latin9"],["Western European (Windows-1252)","windows1252"],["Western European (IBM 00850)","ibm850"],["Eastern European (Latin-2)","latin2"],["Eastern European (Windows-1250)","windows1250"],["Esperanto (Latin-3)","latin3"],["Nordic (Latin-6)","latin6"],["Cyrillic (Windows-1251)","windows1251"],["Russian (KOI8-R)","koi8-ru"],["Ukranian (KOI8-U)","koi8-u"],["Arabic (ISO 8859-6)","ISO-8859-6"],["Arabic (Windows-1256)","windows1256"],["Greek (ISO 8859-7)","ISO-8859-7"],["Greek (Windows-1253)","windows1253"],["Hebrew (ISO 8859-8)","ISO-8859-8"],["Hebrew (Windows-1255)","windows1255"],["Turkish (ISO 8859-9)","ISO-8859-9"],["Turkish (Windows-1254)","windows1254"],["Thai (TIS 620-2533/ISO 8859-11)","ISO-8859-11"],["Thai (Windows-874)","windows874"],["Baltic (Latin-7)","latin7"],["Baltic (Windows-1257)","windows1257"],["Celtic (Latin-8)","latin8"],["South-Eastern European (Latin-10)","latin10"],["Simplified Chinese (ISO-2022-CN-EXT)","ISO-2022-CN-EXT"],["Simplified Chinese Unix (EUC-CN)","EUC-CN"],["Japanese (7-bits JIS/ISO-2022-JP-2)","ISO-2022-JP-2"],["Japanese Unix (EUC-JP)","EUC-JP"],["Japanese (Shift JIS)","Shift_JIS"],["Korean (EUC-KR/CP949)","EUC-KR"],["Korean (ISO-2022-KR)","ISO-2022-KR"],["Traditional Chinese (Big5)","Big5"],["Traditional Chinese Unix (EUC-TW)","EUC-TW"],["Hong-Kong Supplementary (HKSCS)","Big5-HKSCS"],["Vietnamese (VISCII)","viscii"],["Vietnamese (Windows-1258)","windows1258"]],
+    defaults = {
+        audioChan: { "error": -1, "stereo": 1, "reverseStereo": 2, "left": 3, "right": 4, "dolby": 5 },
+        audioChanInt: { "-1": "error", "1": "stereo", "2": "reverseStereo", "3": "left", "4": "right", "5": "dolby" }
+    };
     
 require('jquery-ui/sortable');
 try{var powerSaveBlocker=require('remote').require('power-save-blocker')}catch(ex){var sleep=require('computer-sleep/sleep')}
@@ -695,10 +699,10 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             
             preventSleep();
             if (wjsPlayer.find(".wcp-splash-screen").is(":visible")) {
-				if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
+                if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
                     window.stopPrebuf = true;
                     wjsPlayer.setOpeningText("Opening Video");
-				} else {
+                } else {
                     wjsPlayer.find(".wcp-splash-screen").hide(0);
                     if (opts[i].splashInterval1) {
                         clearInterval(opts[i].splashInterval1);
@@ -716,6 +720,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             if (length > 0) {
                 if (wjsPlayer.find(".wcp-time-current").text() == "") wjsPlayer.find(".wcp-time-current").text("00:00");
                 wjsPlayer.find(".wcp-time-total").text(" / "+wjsPlayer.parseTime(length));
+                window.remote.updateVal("length",length);
             } else wjsPlayer.find(".wcp-time-total").text("");
         }
     }(newid);
@@ -830,6 +835,7 @@ wjs.prototype.addPlaylist = function(playlist) {
      if (Array.isArray(playlist) === true && typeof playlist[0] === 'object') {
          var item = 0;
          for (item = 0; item < playlist.length; item++) {
+              window.remote.updateVal("itemCount",(this.vlc.playlist.itemCount+1))
               if (playlist[item].vlcArgs) {
                   if (!Array.isArray(playlist[item].vlcArgs)) {
                       if (playlist[item].vlcArgs.indexOf(" ") > -1) {
@@ -931,11 +937,14 @@ wjs.prototype.subTrack = function(newTrack) {
     if (["opening","buffering"].indexOf(this.state()) > -1) {
         opts[this.context].setSub = newTrack;
         opts[this.context].currentSub = newTrack;
+        window.remote.updateVal("subTrack",newTrack);
         printSubtitles.call(this);
     } else {
         if (typeof newTrack === 'number') {
             if (newTrack == 0) {
                 this.vlc.subtitles.track = 0;
+                window.remote.updateVal("subTrack",0);
+                opts[this.context].currentSub = 0;
                 clearSubtitles.call(this);
             } else {
                 if (newTrack < this.vlc.subtitles.count) {
@@ -960,6 +969,7 @@ wjs.prototype.subTrack = function(newTrack) {
                     }
                 }
                 opts[this.context].currentSub = newTrack;
+                window.remote.updateVal("subTrack",newTrack);
                 printSubtitles.call(this);
             }
         } else return opts[this.context].currentSub;
@@ -986,33 +996,32 @@ wjs.prototype.audioDesc = function(getDesc) {
     return this;
 }
 wjs.prototype.audioDelay = function(newDelay) {
-    if (typeof newDelay === 'number') this.vlc.audio.delay = newDelay;
-    else return this.vlc.audio.delay;
+    if (typeof newDelay === 'number') {
+        this.vlc.audio.delay = newDelay;
+        window.remote.updateVal('audioDelay',newDelay);
+    } else return this.vlc.audio.delay;
     return this;
 }
+
 wjs.prototype.audioChan = function(newChan) {
     if (typeof newChan === 'string') {
-        if (newChan == "error") this.vlc.audio.channel = -1;
-        else if (newChan == "stereo") this.vlc.audio.channel = 1;
-        else if (newChan == "reverseStereo") this.vlc.audio.channel = 2;
-        else if (newChan == "left") this.vlc.audio.channel = 3;
-        else if (newChan == "right") this.vlc.audio.channel = 4;
-        else if (newChan == "dolby") this.vlc.audio.channel = 5;
-        else return false;
+        if (defaults.audioChan[newChan]) {
+            this.vlc.audio.channel = defaults.audioChan[newChan];
+            window.remote.updateVal('audioChanInt',defaults.audioChan[newChan]);
+            window.remote.updateVal('audioChan',newChan);
+        } else return false;
     } else {
-        if (this.vlc.audio.channel == -1) return "error";
-        else if (this.vlc.audio.channel == 1) return "stereo";
-        else if (this.vlc.audio.channel == 2) return "reverseStereo";
-        else if (this.vlc.audio.channel == 3) return "left";
-        else if (this.vlc.audio.channel == 4) return "right";
-        else if (this.vlc.audio.channel == 5) return "dolby";
+        if (defaults.audioChanInt[this.vlc.audio.channel.toString()]) return defaults.audioChanInt[this.vlc.audio.channel.toString()];
     }
     return this;
 }
 
 wjs.prototype.audioChanInt = function(newChan) {
-    if (typeof newChan === 'number') this.vlc.audio.channel = newChan;
-    else return this.vlc.audio.channel;
+    if (typeof newChan === 'number') {
+        this.vlc.audio.channel = newChan;
+        window.remote.updateVal('audioChanInt',newChan);
+        if (defaults.audioChanInt[newChan.toString()]) window.remote.updateVal('audioChan',defaults.audioChanInt[newChan.toString()]);
+    } else return this.vlc.audio.channel;
     return this;
 }
 
@@ -1041,6 +1050,7 @@ wjs.prototype.volume = function(newVolume) {
         opts[this.context].lastVolume = this.vlc.volume;
         this.vlc.volume = 0;
         vlcs[this.context].events.emit('VolumeChanged',0);
+        window.remote.updateVal('volume',0);
         if (!this.vlc.mute) {
             this.find(".wcp-vol-button").removeClass("wcp-volume-medium").removeClass("wcp-volume-high").removeClass("wcp-volume-low").addClass("wcp-mute");
             this.vlc.mute = true;
@@ -1055,6 +1065,7 @@ wjs.prototype.volume = function(newVolume) {
 
         this.find(".wcp-vol-bar-full").css("width", (((newVolume/200)*parseInt(this.find(".wcp-vol-bar").css("width")))-parseInt(this.find(".wcp-vol-bar-pointer").css("width")))+"px");
         this.vlc.volume = parseInt(newVolume);
+        window.remote.updateVal('volume',parseInt(newVolume));
         vlcs[this.context].events.emit('VolumeChanged',parseInt(newVolume));
     } else return this.vlc.volume;
     return this;
@@ -1079,8 +1090,10 @@ wjs.prototype.position = function(newPosition) {
 }
 
 wjs.prototype.rate = function(newRate) {
-    if (typeof newRate === 'number') this.vlc.input.rate = newRate;
-    else return this.vlc.input.rate;
+    if (typeof newRate === 'number') {
+        this.vlc.input.rate = newRate;
+        window.remote.updateVal('rate',newRate);
+    } else return this.vlc.input.rate;
     return this;
 }
 
@@ -1146,6 +1159,7 @@ wjs.prototype.aspectRatio = function(newRatio) {
         if (opts[this.context].zoom > 0) opts[this.context].zoom = 1;
         opts[this.context].aspectRatio = newRatio;
         autoResize();
+        window.remote.updateVal('aspectRaio',newRatio);
     } else return opts[this.context].aspectRatio;
     return this;
 }
@@ -1156,6 +1170,7 @@ wjs.prototype.crop = function(newCrop) {
         if (opts[this.context].zoom > 0) opts[this.context].zoom = 1;
         opts[this.context].crop = newCrop;
         autoResize();
+        window.remote.updateVal('crop',newCrop);
     } else return opts[this.context].crop;
     return this;
 }
@@ -1166,6 +1181,7 @@ wjs.prototype.zoom = function(newZoom) {
         opts[this.context].crop = "Default";
         opts[this.context].zoom = newZoom;
         autoResize();
+        window.remote.updateVal('zoom',newZoom);
     } else return opts[this.context].zoom;
     return this;
 }
@@ -1477,14 +1493,24 @@ wjs.prototype.notify = function(newMessage) {
 }
 
 wjs.prototype.toggleFullscreen = function() {
-    if (window.document.webkitFullscreenElement == null) return fullscreenOn.call(this);
-    else return fullscreenOff.call(this);
+    if (window.document.webkitFullscreenElement == null) {
+        window.remote.updateVal("fullscreen",true);
+        return fullscreenOn.call(this);
+    } else {
+        window.remote.updateVal("fullscreen",false);
+        return fullscreenOff.call(this);
+    }
 }
 
 wjs.prototype.fullscreen = function(newBool) {
     if (typeof newBool !== 'undefined') {
-        if (newBool === true) return fullscreenOn.call(this);
-        else return fullscreenOff.call(this);
+        if (newBool === true) {
+            window.remote.updateVal("fullscreen",true);
+            return fullscreenOn.call(this);
+        } else {
+            window.remote.updateVal("fullscreen",false);
+            return fullscreenOff.call(this);
+        }
     } else {
         if (window.document.webkitFullscreenElement == null) return false;
         else return true;
@@ -1669,7 +1695,7 @@ function isMediaChanged() {
         if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
         this.find(".wcp-subtitle-but").hide(0);
         
-        if (window.win.gui.title != this.itemDesc(this.currentItem()).title) {
+        if (window.win.gui.title == "") {
             window.win.title.left(this.itemDesc(this.currentItem()).title);
         }
         
@@ -1684,8 +1710,8 @@ function isBuffering(percent) {
     }
     if ((new Date().getTime() - opts[this.context].lastact) > 500 || percent == 100) {
         if (window.remote.port && window.remote.secret && window.remote.socket) {
-			window.remote.socket.emit('event', { name: 'Buffering', value: percent });
-		}
+            window.remote.socket.emit('event', { name: 'Buffering', value: percent });
+        }
         if (stopForce && percent == 100) {
             stopForce = false;
             forceProgress = -1;
@@ -1722,6 +1748,9 @@ function isPlaying() {
         if (this.find(".wcp-title").text() != this.itemDesc(this.currentItem()).title) {
             this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
         }
+        if (window.win.gui.title != this.itemDesc(this.currentItem()).title) {
+            window.win.title.left(this.itemDesc(this.currentItem()).title);
+        }
         opts[this.context].firstTime = false;
         
 //        this.hideSplashScreen();
@@ -1747,8 +1776,9 @@ function isPlaying() {
         }
         
         // set default zoom
-        if (itemSetting.zoom) opts[this.context].zoom = itemSetting.zoom;
-        else {
+        if (itemSetting.zoom) {
+            opts[this.context].zoom = itemSetting.zoom;
+        } else {
             opts[this.context].zoom = 1;
             autoResize();
         }
