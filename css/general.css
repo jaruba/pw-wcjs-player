@@ -299,6 +299,65 @@
 	display: none
 }
 
+.agent-top-left {
+	top: 8px;
+	left: 8px;
+}
+
+.agent-bottom-left {
+	bottom: 46px;
+	left: 8px;
+}
+
+.agent-bottom-right {
+	bottom: 46px;
+	right: 8px;
+}
+
+.wcp-agent-container {
+    display: inline-block;
+    position: relative;
+    width: 12%;
+    max-width: 98px;
+    min-width: 65px;
+  	z-index: 8;
+	margin-left: 8px;
+	margin-top: 8px;
+	float: left;
+}
+
+.wcp-agent-fullscreen {
+	margin-left: 0;
+	margin-top: 43px;
+	margin-right: 19px;
+	float: right;
+}
+
+.wcp-agent-container:hover {
+	opacity: 1;
+}
+
+.wcp-agent-dummy {
+    margin-top: 100%;
+}
+
+.wcp-agent {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+	opacity: 0.5;
+}
+
+.wcp-agent:hover {
+	opacity: 1;
+}
+
+.wcp-agent img {
+	width: 100%;
+}
+
 /* progress bar */
 .wcp-progress-bar {
 	width: 100%;
