@@ -1235,10 +1235,12 @@ function progressHoverIn(e) {
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+					secset = 0;
+					if (!this.fullscreen()) secset += 6;
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset -1)) {
+                        this.find(".wcp-tooltip").css("left",(e.pageX - rect.left - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left", (rect.left - secset)+"px");
+                    else if (e.pageX > (rect.right - offset -1)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width() - secset)+"px");
                     this.find(".wcp-tooltip").show(0);
                 }
             } else this.find(".wcp-tooltip").hide(0);
@@ -1251,10 +1253,12 @@ function progressHoverIn(e) {
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+					secset = 0;
+					if (!this.fullscreen()) secset += 6;
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset -1)) {
+                        this.find(".wcp-tooltip").css("left",(e.pageX - rect.left - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",(rect.left - secset)+"px");
+                    else if (e.pageX > (rect.right - offset -1)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width() - secset)+"px");
                     this.find(".wcp-tooltip").show(0);
                 }
             } else this.find(".wcp-tooltip").hide(0);
@@ -1271,10 +1275,12 @@ function progressMouseMoved(e) {
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+					secset = 0;
+					if (!this.fullscreen()) secset += 6;
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset - 1)) {
+                        this.find(".wcp-tooltip").css("left",(e.pageX - rect.left - offset)+"px");
+					} else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",(rect.left - secset)+"px");
+					else if (e.pageX > (rect.right - offset - 1)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width() - secset)+"px");
                     this.find(".wcp-tooltip").show(0);
                 }
             } else this.find(".wcp-tooltip").hide(0);
@@ -1287,10 +1293,12 @@ function progressMouseMoved(e) {
                 if (newtime > 0) {
                     this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
                     var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                        this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-                    else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+					secset = 0;
+					if (!this.fullscreen()) secset += 6;
+                    if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset -1)) {
+                        this.find(".wcp-tooltip").css("left",(e.pageX - rect.left - offset)+"px");
+                    } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",(rect.left - secset)+"px");
+                    else if (e.pageX > (rect.right - offset -1)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width() - secset)+"px");
                     this.find(".wcp-tooltip").show(0);
                 }
             } else this.find(".wcp-tooltip").hide(0);
@@ -1387,10 +1395,12 @@ function seekDragMoved(e,wjsMulti) {
         if (newtime > 0) {
             this.find(".wcp-tooltip-inner").text(this.parseTime(newtime));
             var offset = Math.floor(this.find(".wcp-tooltip").width() / 2);
-            if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset)) {
-                this.find(".wcp-tooltip").css("left",((e.pageX - rect.left) - offset)+"px");
-            } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",rect.left+"px");
-            else if (e.pageX > (rect.right - offset)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width())+"px");
+			secset = 0;
+			if (!this.fullscreen()) secset += 6;
+            if (e.pageX >= (offset + rect.left) && e.pageX <= (rect.right - offset -1)) {
+                this.find(".wcp-tooltip").css("left",(e.pageX - rect.left - offset)+"px");
+            } else if (e.pageX < (rect.left + offset)) this.find(".wcp-tooltip").css("left",(rect.left - secset)+"px");
+            else if (e.pageX > (rect.right - offset -1)) this.find(".wcp-tooltip").css("left",(rect.right - this.find(".wcp-tooltip").width() - secset)+"px");
             this.find(".wcp-tooltip").show(0);
         }
     }
