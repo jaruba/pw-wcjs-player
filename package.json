@@ -23,6 +23,7 @@
         "jquery-ui": "jaruba/jquery-ui",
 		"computer-sleep" : "jaruba/computer-sleep",
 		"node-subtitles-grouping" : "jaruba/node-subtitles-grouping",
-		"hotkeys" : "jaruba/hotkeys"
+		"hotkeys" : "jaruba/hotkeys",
+		"spotify" : "*"
     }
 }

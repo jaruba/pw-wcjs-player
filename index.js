@@ -32,6 +32,7 @@ var vlcs = {},
     http = require('http'),
     events = require('events'),
     retriever = require('subtitles-grouping/lib/retriever'),
+	artwork = require('./lib/album-artwork'),
     path = require('path'),
     relbase = "./"+path.relative(path.dirname(require.main.filename), __dirname),
     sleepId,
@@ -703,7 +704,11 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             if (wjsPlayer.find(".wcp-splash-screen").is(":visible")) {
                 if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
                     window.stopPrebuf = true;
-                    wjsPlayer.setOpeningText("Opening Video");
+					if (window.powGlobals.lists && window.powGlobals.lists.media && window.powGlobals.lists.media[wjsPlayer.currentItem()] && window.powGlobals.lists.media[wjsPlayer.currentItem()].isAudio) {
+						wjsPlayer.setOpeningText("Loading Audio");
+					} else {
+						wjsPlayer.setOpeningText("Opening Video");
+					}
                 } else {
                     wjsPlayer.find(".wcp-splash-screen").hide(0);
                     if (opts[i].splashInterval1) {
@@ -749,6 +754,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             opts[i].keepHidden = true;
             players[i].zoom(0);
             this.renderer.clearCanvas();
+	        if (this.wrapper.css("backgroundImage") != "none") this.wrapper.css("backgroundImage","none");
 
             allowSleep();
         }
@@ -1698,11 +1704,14 @@ function isMediaChanged() {
         this.find(".wcp-subtitle-text").html("");
         if (this.find(".wcp-subtitles").is(":visible")) this.find(".wcp-subtitles").hide(0);
         this.find(".wcp-subtitle-but").hide(0);
+        this.find(".wcp-status").text("");
+        if (this.wrapper.css("backgroundImage") != "none") this.wrapper.css("backgroundImage","none");
         
         if (window.win.gui.title == "") {
             window.win.title.left(this.itemDesc(this.currentItem()).title);
         }
         
+        artwork.stopTimer();
         opts[this.context].firstTime = true;
     }
 }
@@ -1741,14 +1750,20 @@ function isPlaying() {
     if (opts[this.context].keepHidden) {
         opts[this.context].keepHidden = false;
         itemSetting = this.itemDesc(this.currentItem()).setting;
-        if (itemSetting.zoom) {
-            opts[this.context].zoom = itemSetting.zoom;
-        } else {
-            opts[this.context].zoom = 1;
-            autoResize();
+        if (itemSetting) {
+            if (itemSetting.zoom) {
+                opts[this.context].zoom = itemSetting.zoom;
+            } else {
+                opts[this.context].zoom = 1;
+                autoResize();
+            }
         }
     }
     if (opts[this.context].firstTime) {
+        if (this.fps() == 0) {
+            // this is an audio file
+            artwork.findArtwork(this);
+        }
         if (this.find(".wcp-title").text() != this.itemDesc(this.currentItem()).title) {
             this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
         }
@@ -1792,7 +1807,9 @@ function isPlaying() {
         opts[this.context].subDelay = 0;
         
 //        if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
-        this.find(".wcp-subtitle-but").show(0);
+        if (window.powGlobals.lists.media[this.currentItem()] && !window.powGlobals.lists.media[this.currentItem()].isAudio) {
+			this.find(".wcp-subtitle-but").show(0);
+		}
         
         if (this.itemDesc(this.currentItem()).setting.defaultSub) {
             for (gvn = 1; gvn < this.subCount(); gvn++) {
@@ -2136,22 +2153,22 @@ function printPlaylist() {
               getContext(this).advanceItem(swapItems[0],swapItems[1]);
               if (swapItems[1] < 0) {
                   var tmpVideos = [];
-                  window.powGlobals.lists.videos.forEach(function(el,ij) {
-                      if (ij == (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.videos[swapItems[0]];
-                      else if (ij > (swapItems[0] + swapItems[1]) && ij <= swapItems[0]) tmpVideos[ij] = window.powGlobals.lists.videos[ij-1];
+                  window.powGlobals.lists.media.forEach(function(el,ij) {
+                      if (ij == (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.media[swapItems[0]];
+                      else if (ij > (swapItems[0] + swapItems[1]) && ij <= swapItems[0]) tmpVideos[ij] = window.powGlobals.lists.media[ij-1];
                       else tmpVideos[ij] = el;
                   });
                   setTimeout(function() { window.powGlobals.lists.currentIndex = window.player.currentItem(); },10);
-                  window.powGlobals.lists.videos = tmpVideos;
+                  window.powGlobals.lists.media = tmpVideos;
               } else if (swapItems[1] > 0) {
                   var tmpVideos = [];
-                  window.powGlobals.lists.videos.forEach(function(el,ij) {
-                      if (ij == swapItems[0] + swapItems[1]) tmpVideos[ij] = window.powGlobals.lists.videos[swapItems[0]];
-                      else if (ij >= swapItems[0] && ij < (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.videos[ij+1];
+                  window.powGlobals.lists.media.forEach(function(el,ij) {
+                      if (ij == swapItems[0] + swapItems[1]) tmpVideos[ij] = window.powGlobals.lists.media[swapItems[0]];
+                      else if (ij >= swapItems[0] && ij < (swapItems[0] + swapItems[1])) tmpVideos[ij] = window.powGlobals.lists.media[ij+1];
                       else tmpVideos[ij] = el;
                   });
                   setTimeout(function() { window.powGlobals.lists.currentIndex = window.player.currentItem(); },10);
-                  window.powGlobals.lists.videos = tmpVideos;
+                  window.powGlobals.lists.media = tmpVideos;
               }
           }
         });

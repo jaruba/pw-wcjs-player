@@ -257,6 +257,10 @@
 	position: relative;
 	overflow: hidden;
 	-webkit-user-select: none;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center center;
+	background-image: none;
 }
 
 .wcp-surface {
