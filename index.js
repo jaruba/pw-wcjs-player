@@ -129,7 +129,8 @@ wjs.prototype.play = function(mrl) {
         wjsButton = this.find(".wcp-replay");
         if (wjsButton.length != 0) wjsButton.removeClass("wcp-replay").addClass("wcp-pause");
         
-        if (mrl) this.vlc.playlist.play(mrl);
+		if (!mrl && window.playerApi.tempSel > -1) this.playItem(window.playerApi.tempSel);
+		else if (mrl) this.vlc.playlist.play(mrl);
         else if (this.itemCount() > 0) this.vlc.playlist.play();
     }
     return this;
@@ -209,7 +210,8 @@ wjs.prototype.next = function() {
         }
         if (noDisabled) return false;
         
-        this.playItem(i);
+		if (window.playerApi.tempSel > -1) this.playItem(window.playerApi.tempSel+1);
+        else this.playItem(i);
 
         return this;
     } else return false;
@@ -227,7 +229,8 @@ wjs.prototype.prev = function() {
         }
         if (noDisabled) return false;
 
-        this.playItem(i);
+        if (window.playerApi.tempSel > -1) this.playItem(window.playerApi.tempSel-1);
+        else this.playItem(i);
         
         return this;
     } else return false;
@@ -392,7 +395,6 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     
     wjs(newid).wrapper.find(".wcp-dlna-rescan").click(function() {
         wjsPlayer = getContext(this);
-        window.dlna.findClient();
         wjsPlayer.find(".wcp-subtitle-text").html("");
         var wjsContext = wjsPlayer.context;
         opts[wjsContext].currentSub = 0;
@@ -402,9 +404,12 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             clearInterval(opts[wjsContext].splashInterval2);
             clearInterval(opts[wjsContext].splashInterval3);
         }
+		if (window.dlna.notFoundTimer) clearTimeout(window.dlna.notFoundTimer);
+		if (window.dlna.bestMatches && window.dlna.bestMatches.length) window.dlna.bestMatches = [];
         opts[wjsContext].splashInterval1 = setInterval(function() { logoAnim(); },1000);
         opts[wjsContext].splashInterval2 = setInterval(function() { logoAnim(); },1600);
         opts[wjsContext].splashInterval3 = setInterval(function() { logoAnim(); },2700);
+        window.dlna.findClient();
     });
     
     wjs(newid).wrapper.find(".wcp-dlna-devices").click(function() {
@@ -1697,6 +1702,7 @@ function positionChanged(position) {
 }
 
 function isOpening() {
+	if (window.playerApi.tempSel) window.playerApi.tempSel = -1;
     if (this.currentItem() != opts[this.context].lastItem) {
         opts[this.context].lastItem = this.currentItem();
         if (this.find(".wcp-playlist").is(":visible")) printPlaylist.call(this);
@@ -2292,7 +2298,7 @@ function printSleepMenu() {
             opts[wjsPlayer.context].sleepTimer = setTimeout(function() {
                 if (wjsPlayer.playing()) wjsPlayer.togglePause();
                 if (window.powGlobals.torrent && window.powGlobals.torrent.engine) {
-                    if (window.wjs().fullscreen()) window.wjs().fullscreen(false);
+                    if (window.player.fullscreen()) window.player.fullscreen(false);
                     $("#filesList").css("min-height",$("#player_wrapper").height());
                     $('#inner-in-content').animate({ scrollTop: $("#player_wrapper").height() }, "slow");
                     $('#inner-in-content').css("overflow-y","visible");
@@ -2386,6 +2392,8 @@ function printDlnaClients() {
     } else settingsItems.css("cursor","default");
     
     wjsPlayer.find(".wcp-dlna-clients-item").click(function() {
+		if (window.dlna.notFoundTimer) clearTimeout(window.dlna.notFoundTimer);
+		if (window.dlna.bestMatches && window.dlna.bestMatches.length) window.dlna.bestMatches = [];
         window.dlna.instance.clients[0] = $(this).data("item");
         window.dlna.findMyIp();
         wjsPlayer = getContext(this);
@@ -2644,13 +2652,15 @@ function attachHotkeys() {
             newVolume = (wjsPlayer.volume()*0.625);
     
             if ($(wjsPlayer.find(".wcp-progress-bar").selector + ":hover").length > 0) {
+				if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
 
-                if (wjsPlayer.isLocal()) wjsDelay = 200;
-                else wjsDelay = 800;
+					if (wjsPlayer.isLocal()) wjsDelay = 200;
+					else wjsDelay = 800;
+	
+					if (event.originalEvent.wheelDelta >= 0) wjsPlayer.delayTime((wjsPlayer.length()/120),wjsDelay);
+					else wjsPlayer.delayTime((-1)*(wjsPlayer.length()/120),wjsDelay);
 
-                if (event.originalEvent.wheelDelta >= 0) wjsPlayer.delayTime((wjsPlayer.length()/120),wjsDelay);
-                else wjsPlayer.delayTime((-1)*(wjsPlayer.length()/120),wjsDelay);
-                
+				}
             } else {
     
                 if (event.originalEvent.wheelDelta >= 0) newVolume = (Math.round(newVolume/5)*5)+5;
@@ -2690,7 +2700,7 @@ function attachHotkeys() {
     }).on('f11',function() {
         if (shouldHotkey()) players[wjsContext].toggleFullscreen();
     }).on('n',function() {
-        if (shouldHotkey()) players[wjsContext].next();
+        if (shouldHotkey()) players[wjsContext].find(".wcp-next").trigger("click");
     }).on('ctrl + up',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
@@ -2723,7 +2733,7 @@ function attachHotkeys() {
     }).on('space',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            wjsPlayer.togglePause().animatePause();
+			wjsPlayer.find('.wcp-surface').trigger('click');
         }
     }).on('m',function() {
         if (shouldHotkey()) {
@@ -2766,65 +2776,83 @@ function attachHotkeys() {
     }).on('ctrl + right',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(60000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(60000,wjsDelay);
+			}
         }
     }).on('ctrl + left',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(-60000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(-60000,wjsDelay);
+			}
         }
     }).on('alt + right',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(10000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(10000,wjsDelay);
+			}
         }
     }).on('alt + left',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(-10000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(-10000,wjsDelay);
+			}
         }
     }).on('shift + right',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(3000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(3000,wjsDelay);
+			}
         }
     }).on('shift + left',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime(-3000,wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime(-3000,wjsDelay);
+			}
         }
     }).on('right',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime((wjsPlayer.length()/60),wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime((wjsPlayer.length()/60),wjsDelay);
+			}
         }
     }).on('left',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            if (wjsPlayer.isLocal()) wjsDelay = 200;
-            else wjsDelay = 700;
-            wjsPlayer.delayTime((-1)*(wjsPlayer.length()/60),wjsDelay);
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				if (wjsPlayer.isLocal()) wjsDelay = 200;
+				else wjsDelay = 700;
+				wjsPlayer.delayTime((-1)*(wjsPlayer.length()/60),wjsDelay);
+			}
         }
     }).on('e',function() {
         if (shouldHotkey()) {
             wjsPlayer = players[wjsContext];
-            wjsPlayer.pause();
-            wjsPlayer.delayTime(500,0);
-            wjsPlayer.notify("Next Frame");
+			if (["ended","stopping","error"].indexOf(wjsPlayer.state()) == -1) {
+				wjsPlayer.pause();
+				wjsPlayer.delayTime(500,0);
+				wjsPlayer.notify("Next Frame");
+			}
         }
     }).on('a',function() {
         if (shouldHotkey()) {
