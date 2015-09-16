@@ -31,7 +31,6 @@ var vlcs = {},
     subSize = 1,
     http = require('http'),
     events = require('events'),
-    fs = require('fs'),
     retriever = require('subtitles-grouping/lib/retriever'),
     artwork = require('./lib/album-artwork'),
     path = require('path'),
@@ -317,55 +316,26 @@ wjs.prototype.addPlayer = function(wcpSettings) {
           e.preventDefault();
           window.win.gui.focus();
           
-          if (e.dataTransfer.files.length == 1) {
-              if (["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
-                  if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
-                      newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
-                  } else {
-                      newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
-                  }
-                newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
-                if (window.utils.isJsonString(newSettings)) {
-                    newSettings = JSON.parse(newSettings);
-                    if (newSettings.subtitles) {
-                        oldString = JSON.stringify(newSettings.subtitles);
-                        newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
-                    }
-                } else newSettings = {};
-                newSettings.subtitles = JSON.parse(newString);
-                players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
-                players[nid].subTrack(players[nid].subCount()-1);
-                players[nid].notify("Subtitle Loaded");
+          if (e.dataTransfer.files.length == 1 && ["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
+              if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
+                  newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
               } else {
-                  if (fs.lstatSync(e.dataTransfer.files[0].path).isDirectory()) {
-                     fs.readdir(e.dataTransfer.files[0].path,function(rootPath) {
-                        return function(err,files){
-                            if(err) throw err;
-                            if (window.isWin) pathBreak = '\\';
-                            else pathBreak = '/';
-                            for (var i = 0; i < files.length; i++) files[i] = rootPath + pathBreak + files[i];
-                            window.load.multiple(files);
-                        }
-                      }(e.dataTransfer.files[0].path));
-                  } else window.load.url(e.dataTransfer.files[0].path);
-                  players[nid].notify("Added to Playlist");
+                  newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
               }
+              newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
+              if (window.utils.isJsonString(newSettings)) {
+                  newSettings = JSON.parse(newSettings);
+                  if (newSettings.subtitles) {
+                      oldString = JSON.stringify(newSettings.subtitles);
+                      newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
+                  }
+              } else newSettings = {};
+              newSettings.subtitles = JSON.parse(newString);
+              players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
+              players[nid].subTrack(players[nid].subCount()-1);
+              players[nid].notify("Subtitle Loaded");
           } else {
-              var newFiles = [];
-              for (var i = 0; i < e.dataTransfer.files.length; ++i) {
-                  if (fs.lstatSync(e.dataTransfer.files[i].path).isDirectory()) {
-                      fs.readdir(e.dataTransfer.files[i].path,function(rootPath) {
-                          return function(err,files){
-                              if(err) throw err;
-                              if (window.isWin) pathBreak = '\\';
-                              else pathBreak = '/';
-                              for (var i = 0; i < files.length; i++) files[i] = rootPath + pathBreak + files[i];
-                              window.load.multiple(files);
-                          }
-                      }(e.dataTransfer.files[i].path));
-                  } else newFiles[i] = e.dataTransfer.files[i].path;
-              }
-              if (newFiles.length) window.load.multiple(newFiles);
+              window.load.dropped(e.dataTransfer.files);
               players[nid].notify("Added to Playlist");
           }
           
