@@ -31,6 +31,7 @@ var vlcs = {},
     subSize = 1,
     http = require('http'),
     events = require('events'),
+	fs = require('fs'),
     retriever = require('subtitles-grouping/lib/retriever'),
 	artwork = require('./lib/album-artwork'),
     path = require('path'),
@@ -336,13 +337,35 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                 players[nid].subTrack(players[nid].subCount()-1);
                 players[nid].notify("Subtitle Loaded");
               } else {
-                  window.load.url(e.dataTransfer.files[0].path);
+                  if (fs.lstatSync(e.dataTransfer.files[0].path).isDirectory()) {
+					 fs.readdir(e.dataTransfer.files[0].path,function(rootPath) {
+						return function(err,files){
+							if(err) throw err;
+							if (window.isWin) pathBreak = '\\';
+							else pathBreak = '/';
+							for (var i = 0; i < files.length; i++) files[i] = rootPath + pathBreak + files[i];
+							window.load.multiple(files);
+						}
+					  }(e.dataTransfer.files[0].path));
+				  } else window.load.url(e.dataTransfer.files[0].path);
                   players[nid].notify("Added to Playlist");
               }
           } else {
               var newFiles = [];
-              for (var i = 0; i < e.dataTransfer.files.length; ++i) newFiles[i] = e.dataTransfer.files[i].path;
-              window.load.multiple(newFiles);
+              for (var i = 0; i < e.dataTransfer.files.length; ++i) {
+                  if (fs.lstatSync(e.dataTransfer.files[i].path).isDirectory()) {
+                      fs.readdir(e.dataTransfer.files[i].path,function(rootPath) {
+                          return function(err,files){
+                              if(err) throw err;
+							  if (window.isWin) pathBreak = '\\';
+							  else pathBreak = '/';
+                              for (var i = 0; i < files.length; i++) files[i] = rootPath + pathBreak + files[i];
+                              window.load.multiple(files);
+                          }
+                      }(e.dataTransfer.files[i].path));
+                  } else newFiles[i] = e.dataTransfer.files[i].path;
+              }
+              if (newFiles.length) window.load.multiple(newFiles);
               players[nid].notify("Added to Playlist");
           }
           
