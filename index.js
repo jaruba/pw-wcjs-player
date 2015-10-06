@@ -1321,8 +1321,14 @@ function seekDragEnded(e,wjsMulti) {
         this.find(".wcp-progress-seen").css("width", (p*100)+"%");
         this.find(".wcp-time-current").text(this.find(".wcp-tooltip-inner").text());
 
-        if (!window.dlna.instance.initiated) this.vlc.position = p;
-        else if (window.dlna.castData.casting && window.dlna.castData.castLength) {
+        if (!window.dlna.instance.initiated) {
+			oldPos = this.vlc.position;
+			if (oldPos > p) {
+				window.torrent.hideCache(oldPos,p);
+			}
+			window.torrent.pauseCache = true;
+			this.vlc.position = p;
+		} else if (window.dlna.castData.casting && window.dlna.castData.castLength) {
             window.dlna.instance.controls.seek(parseInt((window.dlna.castData.castLength /1000) *p));
             window.dlna.castData.castingPaused = 0;
             this.setOpeningText("Updating playback position ...");
@@ -3007,6 +3013,10 @@ wjs.prototype.delayTime=function(t,d){
             nextPlayTime = parseInt(forceProgress*wjsPlayer.length());
             wjsPlayer.playItem(wjsPlayer.currentItem());
         } else {
+			if (wjsPlayer.position() > forceProgress) {
+				window.torrent.hideCache(wjsPlayer.position(),forceProgress);
+			}
+			window.torrent.pauseCache = true;
             wjsPlayer.time(parseInt(forceProgress*wjsPlayer.length()));
             forceProgress = -1;
         }
