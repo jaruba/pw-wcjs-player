@@ -102,7 +102,7 @@
 	font-size: 12px;
 }
 
-.wcp-playlist-menu-but:hover {
+.wcp-playlist-menu-but.hover {
 	background-color: #151515
 }
 
@@ -144,7 +144,7 @@
 	color: #131313;
 }
 
-.wcp-menu-item:hover {
+.wcp-menu-item.hover {
 	background-color: #3d3d3d;
 	cursor: pointer;
 	color: #c0c0c0;
@@ -191,9 +191,9 @@
 
 .wcp-menu-selected .wcp-disabler-dot { background: #e5e5e5 }
 
-.wcp-playlist-item:hover .wcp-disabler-dot { background: #696969 }
+.wcp-playlist-item.hover .wcp-disabler-dot { background: #696969 }
 
-.wcp-playlist-item:hover .wcp-disabler-img { opacity: 1 }
+.wcp-playlist-item.hover .wcp-disabler-img { opacity: 1 }
 
 .wcp-subtitles-item, .wcp-settings-item, .wcp-sleep-item, .wcp-folder-item, .wcp-encodings-item, .wcp-dlna-clients-item {
 	width: calc(100% - 14px);
@@ -230,7 +230,7 @@
 	text-align: center;
 }
 
-.wcp-menu-close:hover {
+.wcp-menu-close.hover {
 	background-color: #151515;
 	color: #eaeaea;
 	cursor: pointer
@@ -420,7 +420,7 @@
 	vertical-align: top;
 }
 
-.wcp-button:hover {
+.wcp-button.hover {
 	color: #ffffff;
 	cursor: pointer
 }
@@ -742,7 +742,7 @@ i.wcp-settings-icon:before {
 	cursor: pointer
 }
 
-.wcp-dlna-button:hover {
+.wcp-dlna-button.hover {
 	background-color: #e5e5e5;
 	color: #131313;
 }
