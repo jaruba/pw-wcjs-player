@@ -2259,11 +2259,12 @@ function printSubtitles() {
             wjsPlayer.find(".wcp-subtitle-text").empty();
             opts[wjsPlayer.context].subtitles = [];
             if (wjsPlayer.vlc.subtitles.track > 0) wjsPlayer.vlc.subtitles.track = 0;
-            newSub = $(this).index() - wjsPlayer.vlc.subtitles.count +1;
+            newSub = $(this).index() - wjsPlayer.vlc.subtitles.count;
+            if (wjsPlayer.vlc.subtitles.count) newSub++;
             itemSubtitles = itemSetting.subtitles;
             for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
                 newSub--;
-                if (newSub < 2) {
+                if (newSub == 0) {
                     loadSubtitle.call(wjsPlayer,itemSubtitles[k]);
                     wjsPlayer.notify("Subtitle: "+k);
                     if (itemSubtitles[k].indexOf("http://dl.opensubtitles.org/") == 0) if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
@@ -2273,7 +2274,8 @@ function printSubtitles() {
             }
         }
         wjsPlayer.find(".wcp-subtitles").hide(0);
-        opts[wjsPlayer.context].currentSub = $(this).index();
+        if ($(this).index() == -1) opts[wjsPlayer.context].currentSub = 0;
+        else opts[wjsPlayer.context].currentSub = $(this).index();
         opts[wjsPlayer.context].subDelay = 0;
     });
 }
