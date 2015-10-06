@@ -287,12 +287,12 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     opts[newid].setSingle = true;
     
     $(this.context).each(function(ij,el) { if (!$(el).hasClass("webchimeras")) $(el).addClass("webchimeras"); el.innerHTML = playerbody; });
-	
-	$('.hp').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
+    
+    $('.hp').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
     
     $(".wcp-subtitle-but").hide(0);
     $(".wcp-status").hide(0);
@@ -1328,13 +1328,13 @@ function seekDragEnded(e,wjsMulti) {
         this.find(".wcp-time-current").text(this.find(".wcp-tooltip-inner").text());
 
         if (!window.dlna.instance.initiated) {
-			oldPos = this.vlc.position;
-			if (oldPos > p) {
-				window.torrent.hideCache(oldPos,p);
-			}
-			window.torrent.pauseCache = true;
-			this.vlc.position = p;
-		} else if (window.dlna.castData.casting && window.dlna.castData.castLength) {
+            oldPos = this.vlc.position;
+            if (oldPos > p) {
+                window.torrent.hideCache(oldPos,p);
+            }
+            window.torrent.pauseCache = true;
+            this.vlc.position = p;
+        } else if (window.dlna.castData.casting && window.dlna.castData.castLength) {
             window.dlna.instance.controls.seek(parseInt((window.dlna.castData.castLength /1000) *p));
             window.dlna.castData.castingPaused = 0;
             this.setOpeningText("Updating playback position ...");
@@ -1714,7 +1714,7 @@ function isOpening() {
         this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
-	this.find(".wcp-status").empty();
+    this.find(".wcp-status").empty();
     if (style.display === 'none') this.find(".wcp-status").show();
 }
 
@@ -2115,12 +2115,12 @@ function printPlaylist() {
         playlistItems.css('overflowY', 'scroll');
         playlistItems.empty();
         playlistItems.html(generatePlaylist);
-		
-		$('.hmi-1').mouseenter(function() {
-			$(this).addClass('hover');
-		}).mouseleave(function() {
-			$(this).removeClass('hover');
-		});
+        
+        $('.hmi-1').mouseenter(function() {
+            $(this).addClass('hover');
+        }).mouseleave(function() {
+            $(this).removeClass('hover');
+        });
         
         if (playlistItems.outerHeight() < (oi* parseInt(playlistItems.find(".wcp-playlist-item").css("height")))) {
             playlistItems.css("cursor","pointer");
@@ -2232,13 +2232,13 @@ function printSubtitles() {
 
     playlistItems.empty();
     playlistItems.html(generatePlaylist);
-		
-	$('.hmi-2').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
-	
+        
+    $('.hmi-2').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
+    
     if (playlistItems.outerHeight() < (oi* parseInt(playlistItems.find(".wcp-subtitles-item").css("height")))) {
         playlistItems.css("cursor","pointer");
     } else playlistItems.css("cursor","default");
@@ -2295,11 +2295,11 @@ function printSleepMenu() {
     settingsItems.empty();
     settingsItems.html(generatePlaylist);
 
-	$('.hmi-3').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
+    $('.hmi-3').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
     
     if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-sleep-item").css("height")))) {
         settingsItems.css("cursor","pointer");
@@ -2349,13 +2349,13 @@ function printEncodings() {
 
     settingsItems.empty();
     settingsItems.html(generatePlaylist);
-		
-	$('.hmi-4').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
-	
+        
+    $('.hmi-4').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
+    
     if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-encodings-item").css("height")))) {
         settingsItems.css("cursor","pointer");
     } else settingsItems.css("cursor","default");
@@ -2417,11 +2417,11 @@ function printDlnaClients() {
     settingsItems.empty();
     settingsItems.html(generatePlaylist);
 
-	$('.hmi-5').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
+    $('.hmi-5').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
     
     if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-dlna-clients-item").css("height")))) {
         settingsItems.css("cursor","pointer");
@@ -2450,12 +2450,12 @@ function printFolderMenu() {
     settingsItems.empty();
     settingsItems.html(generatePlaylist);
 
-		
-	$('.hmi-6').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
+        
+    $('.hmi-6').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
     
     if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-folder-item").css("height")))) {
         settingsItems.css("cursor","pointer");
@@ -2494,11 +2494,11 @@ function printSettings() {
     settingsItems.empty();
     settingsItems.html(generatePlaylist);
 
-	$('.hmi-7').mouseenter(function() {
-		$(this).addClass('hover');
-	}).mouseleave(function() {
-		$(this).removeClass('hover');
-	});
+    $('.hmi-7').mouseenter(function() {
+        $(this).addClass('hover');
+    }).mouseleave(function() {
+        $(this).removeClass('hover');
+    });
     
     if (settingsItems.outerHeight() < (oi* parseInt(settingsItems.find(".wcp-settings-item").css("height")))) {
         settingsItems.css("cursor","pointer");
@@ -3063,10 +3063,10 @@ wjs.prototype.delayTime=function(t,d){
             nextPlayTime = parseInt(forceProgress*wjsPlayer.length());
             wjsPlayer.playItem(wjsPlayer.currentItem());
         } else {
-			if (wjsPlayer.position() > forceProgress) {
-				window.torrent.hideCache(wjsPlayer.position(),forceProgress);
-			}
-			window.torrent.pauseCache = true;
+            if (wjsPlayer.position() > forceProgress) {
+                window.torrent.hideCache(wjsPlayer.position(),forceProgress);
+            }
+            window.torrent.pauseCache = true;
             wjsPlayer.time(parseInt(forceProgress*wjsPlayer.length()));
             forceProgress = -1;
         }
