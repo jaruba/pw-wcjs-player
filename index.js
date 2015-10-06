@@ -1708,6 +1708,7 @@ function isOpening() {
         this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
+	this.find(".wcp-status").text("");
     if (style.display === 'none') this.find(".wcp-status").show();
 }
 
