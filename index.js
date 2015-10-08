@@ -35,6 +35,8 @@ var vlcs = {},
     artwork = require('./lib/album-artwork'),
     path = require('path'),
     relbase = "./"+path.relative(path.dirname(require.main.filename), __dirname),
+    hotkeys = require('hotkeys'),
+    dispatcher = new hotkeys.Dispatcher(),
     sleepId,
     cookie,
     delayedTime,
@@ -47,6 +49,8 @@ var vlcs = {},
     
 require('jquery-ui/sortable');
 try{var powerSaveBlocker=require('remote').require('power-save-blocker')}catch(ex){var sleep=require('computer-sleep/sleep')}
+
+dispatcher.getKeymap();
 
 // inject css
 if (!$("link[href='"+relbase+"/css/general.css']").length) {
@@ -104,6 +108,14 @@ function wjs(context) {
     }
     this.plugin = this.vlc;
     return this;
+}
+
+wjs.prototype.hotkeys = function() {
+    return hotkeys;
+}
+
+wjs.prototype.keymap = function() {
+    return dispatcher;
 }
 
 wjs.prototype.toggleMute = function() {
@@ -2689,11 +2701,6 @@ function logoAnim() {
 
 // wall of hotkeys
 function attachHotkeys() {
-
-    hotkeys = require('hotkeys');
-
-    var dispatcher = new hotkeys.Dispatcher();
-    dispatcher.getKeymap();
 
     wjsContext = this.context;
 
