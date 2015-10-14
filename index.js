@@ -610,11 +610,11 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     });
 
     wjs(newid).wrapper.find(".wcp-vol-button").hover(function() {
-        $(sel.call(this,".wcp-vol-control")).animate({ width: 133 },200);
+        $(".wcp-vol-control").stop(true).animate({ width: 133 },200);
     },function() {
 		setTimeout(function() {
 			if (!$(".vol-hp").hasClass('hover') && !volDrag) {
-				$(".wcp-vol-control").animate({ width: 0 },200);
+				$(".wcp-vol-control").stop(true).animate({ width: 0 },200);
 			}
 		},100);
     });
@@ -622,7 +622,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     wjs(newid).wrapper.find('.wcp-vol-control').mouseout(function() {
 		setTimeout(function() {
 			if (!$(".wcp-vol-button").hasClass('hover') && !$(".vol-hp").hasClass('hover') && !volDrag) {
-				$(".wcp-vol-control").animate({ width: 0 },200);
+				$(".wcp-vol-control").stop(true).animate({ width: 0 },200);
 			}
 		},100);
     });
