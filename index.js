@@ -211,10 +211,16 @@ wjs.prototype.stop = function(ignoreButtons) {
 }
 
 wjs.prototype.next = function() {
-    if (this.currentItem() +1 < this.itemCount()) {
+	
+	if (window.playerApi.tempSel > -1) {
+		_currentItem = window.playerApi.tempSel;
+		this.find(".wcp-progress-cache").css("width","0%");
+	} else _currentItem = this.currentItem();
+
+    if (_currentItem +1 < this.itemCount()) {
         
         var noDisabled = true;
-        for (i = this.currentItem() +1; i < this.itemCount(); i++) {
+        for (i = _currentItem +1; i < this.itemCount(); i++) {
             if (!this.itemDesc(i).disabled) {
                 noDisabled = false;
                 break;
@@ -222,18 +228,23 @@ wjs.prototype.next = function() {
         }
         if (noDisabled) return false;
         
-        if (window.playerApi.tempSel > -1) this.playItem(window.playerApi.tempSel+1);
-        else this.playItem(i);
+        this.playItem(i);
 
         return this;
     } else return false;
 }
 
 wjs.prototype.prev = function() {
-    if (this.currentItem() > 0) {
+	
+	if (window.playerApi.tempSel > -1) {
+		_currentItem = window.playerApi.tempSel;
+		this.find(".wcp-progress-cache").css("width","0%");
+	} else _currentItem = this.currentItem();
+	
+    if (_currentItem > 0) {
         
         var noDisabled = true;
-        for (i = this.currentItem() -1; i > -1; i--) {
+        for (i = _currentItem -1; i > -1; i--) {
             if (!this.itemDesc(i).disabled) {
                 noDisabled = false;
                 break;
@@ -241,8 +252,7 @@ wjs.prototype.prev = function() {
         }
         if (noDisabled) return false;
 
-        if (window.playerApi.tempSel > -1) this.playItem(window.playerApi.tempSel-1);
-        else this.playItem(i);
+        this.playItem(i);
         
         return this;
     } else return false;
@@ -2155,6 +2165,9 @@ function printPlaylist() {
             }
         });
         this.find(".wcp-playlist-item").click(function() {
+			if (!window.dlna.instance.initiated && window.playerApi.tempSel > -1) {
+				window.playerApi.tempSel = -1;
+			}
             if (!$(this).hasClass("wcp-menu-selected")) {
                 if (window.playerApi.waitForNext) window.playerApi.waitForNext = false;
                 wjsPlayer = getContext(this);
@@ -2165,6 +2178,7 @@ function printPlaylist() {
                 if (window.dlna.instance.initiated) {
                     window.dlna.instance.lastIndex = $(this).index();
                     window.dlna.play($(this).index());
+					wjsPlayer.find(".wcp-progress-cache").css("width","0%");
                     printPlaylist.call(wjsPlayer);
                     return;
                 }
