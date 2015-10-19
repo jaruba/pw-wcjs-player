@@ -3164,15 +3164,22 @@ wjs.prototype.delayTime=function(t,d){
 
 // this is just junk..
 function calcFontSize(wjsPlayer) {
-    if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) {
-        fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
+    if (wjsPlayer.wrapper.height() < 235) {
+        fontSize = wjsPlayer.wrapper.height()/14;
         if (fontSize < 16) fontSize = 16;
-    } else if (wjsPlayer.wrapper.width() > 982 && wjsPlayer.wrapper.width() <= 1600) {
-        fontSize = wjsPlayer.wrapper.height()/15;
-        if (fontSize > 31) fontSize = 31;
-    } else if (wjsPlayer.wrapper.width() > 1600) {
-        fontSize = ((wjsPlayer.wrapper.width() - 1600) / 35.5) +31;
-    } else fontSize = 20;
+    } else {
+        if (wjsPlayer.wrapper.width() > 220 && wjsPlayer.wrapper.width() <= 982) {
+            fontSize = ((wjsPlayer.wrapper.width() -220) /40) +9;
+            if (fontSize < 16) fontSize = 16;
+        } else if (wjsPlayer.wrapper.width() > 982 && wjsPlayer.wrapper.width() < 1600) {
+            fontSize = wjsPlayer.wrapper.height()/14;
+            if (fontSize > 35) fontSize = 35;
+        } else if (wjsPlayer.wrapper.width() >= 1600 && wjsPlayer.wrapper.width() <= 1920) {
+            fontSize = ((wjsPlayer.wrapper.width() - 1600) / 35.5) +40;
+        } else if (wjsPlayer.wrapper.width() > 1920) {
+            fontSize = parseInt(wjsPlayer.wrapper.width() / 39.2);
+        } else fontSize = 20;
+    }
     return fontSize;
 }
 function resetLogo() {
