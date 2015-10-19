@@ -18,7 +18,7 @@
         "url" : "https://github.com/jaruba/pw-wcjs-player"
     },
     "dependencies": {
-        "wcjs-renderer": "git://github.com/RSATom/wcjs-renderer.git#prebuilt-nwjs",
+        "wcjs-renderer": "jaruba/wcjs-renderer",
         "jquery": "*",
         "jquery-ui": "jaruba/jquery-ui",
         "computer-sleep" : "jaruba/computer-sleep",
