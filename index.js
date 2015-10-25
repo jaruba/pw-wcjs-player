@@ -335,8 +335,7 @@ wjs.prototype.addPlayer = function(wcpSettings) {
         wjs(newid).wrapper.css({cursor: 'pointer'});
     }
 
-    // drag and drop logic
-    
+    // drag and drop over player
     var holder = window.document.getElementById('player_wrapper');
     holder.ondragover = function () {
         players["#"+$(this).find(".wcp-wrapper").attr("id")].notify("Drop to Add File");
@@ -349,35 +348,43 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     };
     holder.ondrop = function (nid) {
         return function(e) {
-          e.preventDefault();
-          window.win.gui.focus();
-          
-          if (e.dataTransfer.files.length == 1 && ["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
-              if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
-                  newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
-              } else {
-                  newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
-              }
-              newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
-              if (window.utils.isJsonString(newSettings)) {
-                  newSettings = JSON.parse(newSettings);
-                  if (newSettings.subtitles) {
-                      oldString = JSON.stringify(newSettings.subtitles);
-                      newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
-                  }
-              } else newSettings = {};
-              newSettings.subtitles = JSON.parse(newString);
-              players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
-              players[nid].subTrack(players[nid].subCount()-1);
-              players[nid].notify("Subtitle Loaded");
-          } else {
-              window.load.dropped(e.dataTransfer.files);
-              players[nid].notify("Added to Playlist");
-          }
-          
-          $(this).removeClass('wcp-drag-hover');
-          players[nid].refreshPlaylist();
-          return false;
+            window.win.gui.focus();
+            $(this).removeClass('wcp-drag-hover');
+            if (e.dataTransfer.files.length > 0) {
+                e.preventDefault();
+                if (e.dataTransfer.files.length == 1 && ["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
+                    if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
+                        newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
+                    } else {
+                        newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
+                    }
+                    newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
+                    if (window.utils.isJsonString(newSettings)) {
+                        newSettings = JSON.parse(newSettings);
+                        if (newSettings.subtitles) {
+                            oldString = JSON.stringify(newSettings.subtitles);
+                            newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
+                        }
+                    } else newSettings = {};
+                    newSettings.subtitles = JSON.parse(newString);
+                    players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
+                    players[nid].subTrack(players[nid].subCount()-1);
+                    players[nid].notify("Subtitle Loaded");
+                } else {
+                    window.load.dropped(e.dataTransfer.files);
+                    players[nid].notify("Added to Playlist");
+                }
+
+                players[nid].refreshPlaylist();
+                return false;
+            } else {
+                droppedLink = e.dataTransfer.getData("text/plain");
+                if (droppedLink) {
+                    window.load.url(droppedLink);
+                    players[nid].refreshPlaylist();
+                    players[nid].notify("Added to Playlist");
+                }
+            }
         }
     }(newid);
     
@@ -1191,6 +1198,11 @@ wjs.prototype.currentItem = function(i) {
 wjs.prototype.itemDesc = function(getDesc) {
     if (typeof getDesc === 'number') {
         if (getDesc > -1 && getDesc < this.itemCount()) {
+
+            if (this.vlc.playlist.items[getDesc].title.indexOf('"') > -1) {
+                this.vlc.playlist.items[getDesc].title = this.vlc.playlist.items[getDesc].title.split('"').join("'");
+            }
+
             wjsDesc = JSON.stringify(this.vlc.playlist.items[getDesc]);
             return JSON.parse(wjsDesc.replace('"title":"[custom]','"title":"').split('\\"').join('"').split('"{').join('{').split('}"').join('}'));
         } else return false;
