@@ -40,7 +40,6 @@ var vlcs = {},
     sleepId,
     cookie,
     delayedTime,
-    supportedLinks = ["youtube.com","video.google.com",".googlevideo.com","vimeo.com","dailymotion.com","dailymotion.co.uk","bbc.co.uk","trailers.apple.com","break.com","canalplus.fr","extreme.com","france2.fr","jamendo.com","koreus.com","lelombrik.net","liveleak.com","metacafe.com","mpora.com","pinkbike.com","pluzz.francetv.fr","rockbox.org","soundcloud.com","zapiks.com","metachannels.com","joox.com"],
     supportedEncoding = [["Auto Detect","auto"],["Universal (UTF-8)","utf8"],["Universal (UTF-16)","utf16"],["Universal (big endian UTF-16)","UTF-16BE"],["Universal (little endian UTF-16)","utf16le"],["Universal, Chinese (GB18030)","GB18030"],["Western European (Latin-9)","latin9"],["Western European (Windows-1252)","windows1252"],["Western European (IBM 00850)","ibm850"],["Eastern European (Latin-2)","latin2"],["Eastern European (Windows-1250)","windows1250"],["Esperanto (Latin-3)","latin3"],["Nordic (Latin-6)","latin6"],["Cyrillic (Windows-1251)","windows1251"],["Russian (KOI8-R)","koi8-ru"],["Ukranian (KOI8-U)","koi8-u"],["Arabic (ISO 8859-6)","ISO-8859-6"],["Arabic (Windows-1256)","windows1256"],["Greek (ISO 8859-7)","ISO-8859-7"],["Greek (Windows-1253)","windows1253"],["Hebrew (ISO 8859-8)","ISO-8859-8"],["Hebrew (Windows-1255)","windows1255"],["Turkish (ISO 8859-9)","ISO-8859-9"],["Turkish (Windows-1254)","windows1254"],["Thai (TIS 620-2533/ISO 8859-11)","ISO-8859-11"],["Thai (Windows-874)","windows874"],["Baltic (Latin-7)","latin7"],["Baltic (Windows-1257)","windows1257"],["Celtic (Latin-8)","latin8"],["South-Eastern European (Latin-10)","latin10"],["Simplified Chinese (ISO-2022-CN-EXT)","ISO-2022-CN-EXT"],["Simplified Chinese Unix (EUC-CN)","EUC-CN"],["Japanese (7-bits JIS/ISO-2022-JP-2)","ISO-2022-JP-2"],["Japanese Unix (EUC-JP)","EUC-JP"],["Japanese (Shift JIS)","Shift_JIS"],["Korean (EUC-KR/CP949)","EUC-KR"],["Korean (ISO-2022-KR)","ISO-2022-KR"],["Traditional Chinese (Big5)","Big5"],["Traditional Chinese Unix (EUC-TW)","EUC-TW"],["Hong-Kong Supplementary (HKSCS)","Big5-HKSCS"],["Vietnamese (VISCII)","viscii"],["Vietnamese (Windows-1258)","windows1258"]],
     defaults = {
         audioChan: { "error": -1, "stereo": 1, "reverseStereo": 2, "left": 3, "right": 4, "dolby": 5 },
@@ -649,8 +648,8 @@ wjs.prototype.addPlayer = function(wcpSettings) {
     vlcs[newid].timestampUI = 0;
     vlcs[newid].renderer = require("wcjs-renderer");
     
-    // set default network-caching to 10 seconds
-    if (!wcpSettings["buffer"]) wcpSettings["buffer"] = 10000;
+    // set network-caching
+    if (!wcpSettings["buffer"]) wcpSettings["buffer"] = window.localStorage.bufferSize * 1000;
     
     if (!wcpSettings["vlcArgs"]) wcpSettings["vlcArgs"] = ["--network-caching="+wcpSettings["buffer"]];
     else {
@@ -1705,7 +1704,7 @@ function fullscreenOff() {
 // player event handlers
 function timePassed(t) {
     if (opts[this.context].setSingle) {
-        if (t > 0 && t < 1000 && !new RegExp(supportedLinks.join("|")).test(this.itemDesc(this.currentItem()).mrl)) {
+        if (t > 0 && t < 1000 && !new RegExp(window.playerApi.supportedLinks.join("|")).test(this.itemDesc(this.currentItem()).mrl)) {
             vlcs[this.context].vlc.playlist.mode = vlcs[this.context].vlc.playlist.Single;
         }
         opts[this.context].setSingle = false;
