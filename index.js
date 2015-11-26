@@ -798,9 +798,9 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             if (!opts[i].keepFrame) {
                 opts[i].keepHidden = true;
                 players[i].zoom(0);
-                this.renderer.clearCanvas();
-            } else this.renderer.skipFrames(2);
-            if (this.wrapper.css("backgroundImage") != "none") this.wrapper.css("backgroundImage","none");
+                players[i].renderer.clearCanvas();
+            } else players[i].renderer.skipFrames(2);
+            if (players[i].wrapper.css("backgroundImage") != "none") players[i].wrapper.css("backgroundImage","none");
 
             allowSleep();
         }
