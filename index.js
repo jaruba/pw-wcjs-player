@@ -1202,8 +1202,18 @@ wjs.prototype.itemDesc = function(getDesc) {
                 this.vlc.playlist.items[getDesc].title = this.vlc.playlist.items[getDesc].title.split('"').join("'");
             }
 
-            wjsDesc = JSON.stringify(this.vlc.playlist.items[getDesc]);
-            return JSON.parse(wjsDesc.replace('"title":"[custom]','"title":"').split('\\"').join('"').split('"{').join('{').split('}"').join('}'));
+            try {
+                wjsDesc = JSON.stringify(this.vlc.playlist.items[getDesc]);
+                wjsDesc = JSON.parse(wjsDesc.replace('"title":"[custom]','"title":"').split('\\"').join('"').split('"{').join('{').split('}"').join('}'));
+            } catch(e) {
+                wjsDesc = this.vlc.playlist.items[getDesc];
+                try {
+                    wjsDesc.setting = JSON.parse(wjsDesc.setting);
+                } catch (e) {
+                    wjsDesc.setting = {};
+                }
+            }
+            return wjsDesc;
         } else return false;
     }
     return false;
