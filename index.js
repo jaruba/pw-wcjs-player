@@ -1882,6 +1882,7 @@ function isPlaying() {
         if (this.fps() == 0) {
             // this is an audio file
             artwork.findArtwork(this);
+            this.zoom(0);
         }
         if (this.find(".wcp-title").text() != this.itemDesc(this.currentItem()).title) {
             this.find(".wcp-title")[0].innerHTML = this.itemDesc(this.currentItem()).title;
