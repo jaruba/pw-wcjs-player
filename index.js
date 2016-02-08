@@ -28,7 +28,7 @@ var vlcs = {},
     stopForce = false,
     forceProgress = -1,
     nextPlayTime = -1,
-    subSize = 1,
+    subSize = parseFloat(window.localStorage.subSizeDefault),
     http = require('http'),
     events = require('events'),
     retriever = require('subtitles-grouping/lib/retriever'),
@@ -115,6 +115,11 @@ wjs.prototype.hotkeys = function() {
 
 wjs.prototype.keymap = function() {
     return dispatcher;
+}
+
+wjs.prototype.setSubSize = function(size) {
+    subSize = size;
+    return this;
 }
 
 wjs.prototype.toggleMute = function() {
