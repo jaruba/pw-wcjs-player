@@ -356,11 +356,11 @@ wjs.prototype.addPlayer = function(wcpSettings) {
             $(this).removeClass('wcp-drag-hover');
             if (e.dataTransfer.files.length > 0) {
                 e.preventDefault();
-                if (e.dataTransfer.files.length == 1 && ["sub","srt","vtt"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
+                if (e.dataTransfer.files.length == 1 && ["sub","srt","vtt","gz"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
                     if (e.dataTransfer.files[0].path.indexOf("/") > -1) {
-                        newString = '{"'+e.dataTransfer.files[0].path.split('/').pop()+'":"'+e.dataTransfer.files[0].path+'"}';
+                        newString = '{"'+e.dataTransfer.files[0].path.split('/').pop().replace(/\.[^/.]+$/, "")+'":"'+e.dataTransfer.files[0].path+'"}';
                     } else {
-                        newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop()+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
+                        newString = '{"'+e.dataTransfer.files[0].path.split('\\').pop().replace(/\.[^/.]+$/, "")+'":"'+e.dataTransfer.files[0].path.split('\\').join('\\\\')+'"}';
                     }
                     newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
                     if (window.utils.isJsonString(newSettings)) {
@@ -374,6 +374,29 @@ wjs.prototype.addPlayer = function(wcpSettings) {
                     players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
                     players[nid].subTrack(players[nid].subCount()-1);
                     players[nid].notify("Subtitle Loaded");
+                } else if (e.dataTransfer.files.length == 1 && ["zip"].indexOf(e.dataTransfer.files[0].path.split('.').pop().toLowerCase()) > -1) {
+                    var zipPath = e.dataTransfer.files[0].path;
+                    retriever.retrieveSrt(zipPath,function(err,res,subnm) {
+                        if (subnm) {
+                            if (zipPath.indexOf("/") > -1) {
+                                newString = '{"'+subnm.replace(/\.[^/.]+$/, "")+'":"'+zipPath+'"}';
+                            } else {
+                                newString = '{"'+subnm.replace(/\.[^/.]+$/, "")+'":"'+zipPath.split('\\').join('\\\\')+'"}';
+                            }
+                            newSettings = players[nid].vlc.playlist.items[players[nid].currentItem()].setting;
+                            if (window.utils.isJsonString(newSettings)) {
+                                newSettings = JSON.parse(newSettings);
+                                if (newSettings.subtitles) {
+                                    oldString = JSON.stringify(newSettings.subtitles);
+                                    newString = oldString.substr(0,oldString.length -1)+","+newString.substr(1);
+                                }
+                            } else newSettings = {};
+                            newSettings.subtitles = JSON.parse(newString);
+                            players[nid].vlc.playlist.items[players[nid].currentItem()].setting = JSON.stringify(newSettings);
+                            players[nid].subTrack(players[nid].subCount()-1);
+                            players[nid].notify("Subtitle Loaded");
+                        }
+                    },{ charset: window.localStorage.subEncoding });
                 } else {
                     window.load.dropped(e.dataTransfer.files);
                     players[nid].notify("Added to Playlist");
@@ -2699,8 +2722,12 @@ function loadSubtitle(subtitleElement) {
         } else this.notify("Subtitle Error");
         return;
     } else {
-        retriever.retrieveSrt(subtitleElement,function(err,res) {
-            processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
+        retriever.retrieveSrt(subtitleElement,function(err,res,subnm) {
+            if (subnm) {
+                processSub.call(wjsPlayer,res,subnm.split('.').pop());
+            } else {
+                processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
+            }
         },{ charset: window.localStorage.subEncoding });
         return;
     }
