@@ -1034,6 +1034,7 @@ wjs.prototype.subTrack = function(newTrack) {
     } else {
         if (typeof newTrack === 'number') {
             if (newTrack == 0) {
+                window.playerApi.cache.lastSubtitle = 0;
                 this.vlc.subtitles.track = 0;
                 window.remote.updateVal("subTrack",0);
                 opts[this.context].currentSub = 0;
@@ -1043,7 +1044,10 @@ wjs.prototype.subTrack = function(newTrack) {
                     this.find(".wcp-subtitle-text").empty();
                     opts[this.context].subtitles = [];
                     this.vlc.subtitles.track = newTrack;
+                    window.playerApi.cache.lastSubtitle = this.vlc.subtitles.track;
+                    window.playerApi.cache.lastSubName = this.vlc.subtitles[this.vlc.subtitles.track];
                 } else {
+                    window.playerApi.cache.lastSubtitle = 0;
                     this.find(".wcp-subtitle-text").empty();
                     opts[this.context].subtitles = [];
                     
@@ -1079,8 +1083,13 @@ wjs.prototype.subDelay = function(newDelay) {
 }
 
 wjs.prototype.audioTrack = function(newTrack) {
-    if (typeof newTrack === 'number') this.vlc.audio.track = newTrack;
-    else return this.vlc.audio.track;
+    if (typeof newTrack === 'number') {
+        this.vlc.audio.track = newTrack;
+        window.playerApi.cache.lastAudioTrack = this.vlc.audio.track;
+        if (newTrack > 0) {
+            window.playerApi.cache.lastAudioName = this.vlc.audio[this.vlc.audio.track];
+        }
+    } else return this.vlc.audio.track;
     return this;
 }
 wjs.prototype.audioDesc = function(getDesc) {
@@ -1907,6 +1916,14 @@ function isPlaying() {
         }
     }
     if (opts[this.context].firstTime) {
+        if (window.playerApi.cache.lastAudioTrack > 1) {
+            // persistent audio track selection in playlists
+            if (this.vlc.audio[window.playerApi.cache.lastAudioTrack] == window.playerApi.cache.lastAudioName) {
+                this.vlc.audio.track = window.playerApi.cache.lastAudioTrack;
+                window.ctxMenu.refresh();
+            }
+        }
+
         if (this.fps() == 0) {
             // this is an audio file
             artwork.findArtwork(this);
@@ -1922,8 +1939,25 @@ function isPlaying() {
         
 //        this.hideSplashScreen();
         
-        if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
-        opts[this.context].currentSub = 0;
+        var trySetSub = true;
+        
+        if (window.playerApi.cache.lastSubtitle) {
+            // persistent internal subtitle track selection in playlists
+            if (this.vlc.subtitles[window.playerApi.cache.lastSubtitle] == window.playerApi.cache.lastSubName) {
+                var self = this;
+                setTimeout(function() {
+                    self.vlc.subtitles.track = window.playerApi.cache.lastSubtitle;
+                    opts[self.context].currentSub = window.playerApi.cache.lastSubtitle;
+                    opts[self.context].subtitles = [];
+                    self.notify('Subtitle: '+window.playerApi.cache.lastSubName);
+                }, 2000);
+                trySetSub = false;
+            }
+        } else {
+            // otherwise remove the internal subtitle so the external ones can be selected
+            if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
+            opts[this.context].currentSub = 0;
+        }
         opts[this.context].trackSub = -1;
         totalSubs = this.vlc.subtitles.count;
         itemSetting = this.itemDesc(this.currentItem()).setting;
@@ -1963,18 +1997,22 @@ function isPlaying() {
             }
         }
         
-        if (this.itemDesc(this.currentItem()).setting.defaultSub) {
-            for (gvn = 1; gvn < this.subCount(); gvn++) {
-                if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
-                    this.subTrack(gvn);
-                    break;
+        if (trySetSub) {
+            if (this.itemDesc(this.currentItem()).setting.defaultSub && opts[this.context].currentSub == 0) {
+                for (gvn = 1; gvn < this.subCount(); gvn++) {
+                    if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
+                        this.subTrack(gvn);
+                        break;
+                    }
+                }
+            } else {
+                if (opts[this.context].setSub) {
+                    this.subTrack(opts[this.context].setSub);
+                    delete opts[this.context].setSub;
                 }
             }
-        } else {
-            if (opts[this.context].setSub) {
-                this.subTrack(opts[this.context].setSub);
-                delete opts[this.context].setSub;
-            }
+        } else if (opts[this.context].setSub) {
+            delete opts[this.context].setSub;
         }
     }
     var style = window.getComputedStyle(this.find(".wcp-status")[0]);
@@ -2384,12 +2422,16 @@ function printSubtitles() {
             clearSubtitles.call(wjsPlayer);
             wjsPlayer.notify("Subtitle Unloaded");
             window.localStorage.subLang = "None";
+            window.playerApi.cache.lastSubtitle = 0;
         } else if ($(this).index() < wjsPlayer.vlc.subtitles.count) {
             wjsPlayer.find(".wcp-subtitle-text").empty();
             opts[wjsPlayer.context].subtitles = [];
             wjsPlayer.vlc.subtitles.track = $(this).index();
             wjsPlayer.notify("Subtitle: "+wjsPlayer.subDesc($(this).index()).language);
+            window.playerApi.cache.lastSubtitle = wjsPlayer.vlc.subtitles.track;
+            window.playerApi.cache.lastSubName = wjsPlayer.vlc.subtitles[wjsPlayer.vlc.subtitles.track];
         } else {
+            window.playerApi.cache.lastSubtitle = 0;
             wjsPlayer.find(".wcp-subtitle-text").empty();
             opts[wjsPlayer.context].subtitles = [];
             if (wjsPlayer.vlc.subtitles.track > 0) wjsPlayer.vlc.subtitles.track = 0;
