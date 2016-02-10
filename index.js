@@ -974,6 +974,10 @@ wjs.prototype.refreshPlaylist = function() {
     if (this.find(".wcp-playlist").is(":visible")) printPlaylist.call(this);
 }
 
+wjs.prototype.refreshSubtitles = function() {
+    if (this.find(".wcp-subtitles").is(":visible")) printSubtitles.call(this);
+}
+
 // function to Get Subtitle Description
 wjs.prototype.subDesc = function(getDesc) {
     // check if it is a number then return description
@@ -1920,7 +1924,7 @@ function isPlaying() {
             // persistent audio track selection in playlists
             if (this.vlc.audio[window.playerApi.cache.lastAudioTrack] == window.playerApi.cache.lastAudioName) {
                 this.vlc.audio.track = window.playerApi.cache.lastAudioTrack;
-                window.ctxMenu.refresh();
+                window.ctxMenu.refreshAudioMenu();
             }
         }
 
@@ -1950,6 +1954,7 @@ function isPlaying() {
                     opts[self.context].currentSub = window.playerApi.cache.lastSubtitle;
                     opts[self.context].subtitles = [];
                     self.notify('Subtitle: '+window.playerApi.cache.lastSubName);
+                    self.refreshSubtitles();
                 }, 2000);
                 trySetSub = false;
             }
@@ -1957,6 +1962,7 @@ function isPlaying() {
             // otherwise remove the internal subtitle so the external ones can be selected
             if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
             opts[this.context].currentSub = 0;
+            this.refreshSubtitles();
         }
         opts[this.context].trackSub = -1;
         totalSubs = this.vlc.subtitles.count;
