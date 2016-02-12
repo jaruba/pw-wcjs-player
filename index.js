@@ -1968,6 +1968,8 @@ function isPlaying() {
         totalSubs = this.vlc.subtitles.count;
         itemSetting = this.itemDesc(this.currentItem()).setting;
         
+        if (!itemSetting) itemSetting = {};
+        
         // set default aspect ratio
         if (itemSetting.aspectRatio) opts[this.context].aspectRatio = itemSetting.aspectRatio;
         else {
@@ -1997,14 +1999,14 @@ function isPlaying() {
 //        if (totalSubs > 0) this.find(".wcp-subtitle-but").show(0);
         if (window.powGlobals.torrent.engine && window.powGlobals.lists.media[this.currentItem()] && !window.powGlobals.lists.media[this.currentItem()].isAudio) {
             this.find(".wcp-subtitle-but").show(0);
-        } else if (!window.powGlobals.torrent.engine && this.itemDesc(this.currentItem()).mrl.indexOf('.') > -1) {
+        } else if (!window.powGlobals.torrent.engine && this.itemDesc(this.currentItem()).mrl && this.itemDesc(this.currentItem()).mrl.indexOf('.') > -1) {
             if (window.playerApi.supportedVideos.indexOf(window.utils.parser(this.itemDesc(this.currentItem()).mrl).extension()) > -1) {
                 this.find(".wcp-subtitle-but").show(0);
             }
         }
         
         if (trySetSub) {
-            if (this.itemDesc(this.currentItem()).setting.defaultSub && opts[this.context].currentSub == 0) {
+            if (this.itemDesc(this.currentItem()).setting && this.itemDesc(this.currentItem()).setting.defaultSub && opts[this.context].currentSub == 0) {
                 for (gvn = 1; gvn < this.subCount(); gvn++) {
                     if (this.subDesc(gvn).language == this.itemDesc(this.currentItem()).setting.defaultSub) {
                         this.subTrack(gvn);
