@@ -2789,7 +2789,15 @@ function loadSubtitle(subtitleElement) {
                 window.torrent.flood.start();
                 processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
             },{ charset: window.localStorage.subEncoding });
-        } else this.notify("Subtitle Error");
+        } else if (subtitleElement.indexOf('http://dl.opensubtitles.org/en/download/subencoding-utf8/') == 0) {
+            retriever.retrieveSrt(subtitleElement.replace('/subencoding-utf8/','/file/'),function(err, res) {
+                window.torrent.flood.start();
+                processSub.call(wjsPlayer, res, subtitleElement.split('.').pop());
+            },{ charset: window.localStorage.subEncoding });
+        } else {
+            window.torrent.flood.start();
+            this.notify("Subtitle Error");
+        }
         return;
     } else {
         retriever.retrieveSrt(subtitleElement,function(err,res,subnm) {
@@ -2805,13 +2813,21 @@ function loadSubtitle(subtitleElement) {
 
     window.torrent.flood.pause();
     var req = http.request(callOpts,function(res) {
-        if ([501,404].indexOf(res.statusCode) > -1) {
-            if (altSub)    {
+        if ([501,410,404].indexOf(res.statusCode) > -1) {
+            if (altSub) {
                 retriever.retrieveSrt("http://dl.opensubtitles.org/en/download/file/"+subtitleElement.split('/').pop(),function(err,res) {
                     window.torrent.flood.start();
                     processSub.call(wjsPlayer,res,subtitleElement.split('.').pop());
                 },{ charset: window.localStorage.subEncoding });
-            } else wjsPlayer.notify("Subtitle Error");
+            } else if (subtitleElement.indexOf('http://dl.opensubtitles.org/en/download/subencoding-utf8/') == 0) {
+                retriever.retrieveSrt(subtitleElement.replace('/subencoding-utf8/','/file/'),function(err, res) {
+                    window.torrent.flood.start();
+                    processSub.call(wjsPlayer, res, subtitleElement.split('.').pop());
+                },{ charset: window.localStorage.subEncoding });
+            }  else {
+                window.torrent.flood.start();
+                wjsPlayer.notify("Subtitle Error");
+            }
         } else {
             res.on('data', function (data) { resData += data; });
             res.on('end', function() {
