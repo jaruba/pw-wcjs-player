@@ -92,6 +92,10 @@
 	height: 303px;
 }
 
+.wcp-subtitles-hidden {
+	display: none
+}
+
 .wcp-playlist-menu-but {
 	background-color: #1c1c1c;
 	cursor: pointer;
