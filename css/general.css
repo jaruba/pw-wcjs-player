@@ -118,7 +118,7 @@
 .wcp-canvas { z-index: 1 }
 
 .wcp-menu {
-	font-size: 13px;
+	font-size: 14px;
 	font-family: "Roboto";
 	letter-spacing: 1px;
 /*	font-family: 'Helvetica', 'Arial';
@@ -129,7 +129,8 @@
 	height: 272px;
 	max-width: 90%;
 	max-height: 80%;
-	background-color: #292929;
+/*	background-color: #292929; */
+	background-color: rgba(51, 51, 51, 0.92);
 	color: #c0c0c0;
 	padding: 6px;
 	display: none;
@@ -160,11 +161,13 @@
 
 .wcp-menu-title {
 	height: 26px;
-	line-height: 26px;
-	background-color: #1c1c1c;
+	line-height: 27px;
+	background-color: rgba(28,28,28,0.7);
 	padding-left: 12px;
 	width: calc(100% - 56px);
 	overflow-y: hidden;
+	color: #868686;
+	font-size: 14px;
 }
 
 .wcp-menu-items {
@@ -175,10 +178,11 @@
 	overflow-y: scroll;
 	overflow-x: hidden;
 	list-style-type: none;
+	color: rgb(206, 206, 206);
 }
 
 .wcp-playlist-items, .wcp-subtitles-items {
-	height: calc(100% - 64px);
+	height: calc(100% - 63px);
 	margin-bottom: 11px
 }
 
@@ -192,14 +196,17 @@
 }
 
 .wcp-menu-selected {
-	background-color: #e5e5e5;
-	color: #131313;
+/*	background-color: #e5e5e5;
+	color: #131313; */
+	background-color: rgba(8,117,143,0.7);
+	color: #fff;
 }
 
 .wcp-menu-item.hover {
-	background-color: #3d3d3d;
+/*	background-color: #3d3d3d; */
 	cursor: pointer;
 	color: #c0c0c0;
+	background-color: rgba(0,0,0,0.35);
 }
 
 .wcp-disabler-hold {
@@ -277,7 +284,8 @@
 	line-height: 26px;
 	width: 35px;
 	font-family: 'Glyphs';
-	background-color: #1c1c1c;
+/*	background-color: #1c1c1c; */
+	background-color: transparent !important;
 	float: right;
 	text-align: center;
 }
@@ -290,8 +298,8 @@
 
 .wcp-menu-close:before {
 	content: "\E896";
-	font-size: 12px;
-	margin-left: 1px;
+	font-size: 16px;
+/*	margin-left: 1px; */
 }
 
 
