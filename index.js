@@ -2925,7 +2925,7 @@ function attachHotkeys() {
     }).on('esc',function(e) {
         if (shouldHotkey(e)) {
             wjsPlayer = players[wjsContext];
-            if (window.document.webkitFullscreenElement == null) wjsPlayer.find(".wcp-menu-close")[0].trigger("click");
+            if (window.document.webkitFullscreenElement == null) $(wjsPlayer.find(".wcp-menu-close")[0]).trigger("click");
             else wjsPlayer.fullscreen(false);
         }
     }).on('f',function(e) {
