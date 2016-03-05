@@ -1960,11 +1960,13 @@ function isPlaying() {
         
         var trySetSub = true;
         
+        
         if (window.playerApi.cache.lastSubtitle) {
             // persistent internal subtitle track selection in playlists
             if (this.vlc.subtitles[window.playerApi.cache.lastSubtitle] == window.playerApi.cache.lastSubName) {
                 var self = this;
                 setTimeout(function() {
+                    self.find(".wcp-subtitle-text").empty();
                     self.vlc.subtitles.track = window.playerApi.cache.lastSubtitle;
                     opts[self.context].currentSub = window.playerApi.cache.lastSubtitle;
                     opts[self.context].subtitles = [];
@@ -1973,6 +1975,16 @@ function isPlaying() {
                 }, 2000);
                 trySetSub = false;
             }
+        } else if ((window.localStorage.loadVideoSubs == 'one' && this.vlc.subtitles.count == 2) || (window.localStorage.loadVideoSubs == 'always' && this.vlc.subtitles.count > 1)) {
+                var self = this;
+                setTimeout(function() {
+                    self.find(".wcp-subtitle-text").empty();
+                    self.vlc.subtitles.track = 1;
+                    opts[self.context].currentSub = 1;
+                    opts[self.context].subtitles = [];
+                    self.notify(window.i18n('Subtitle') + ': ' + self.vlc.subtitles[1]);
+                }, 2000);
+                trySetSub = false;
         } else {
             // otherwise remove the internal subtitle so the external ones can be selected
             if (this.vlc.subtitles.track > 0) this.vlc.subtitles.track = 0;
