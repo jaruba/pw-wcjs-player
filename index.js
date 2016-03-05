@@ -1799,19 +1799,19 @@ function timePassed(t) {
             
             if (subtitle > 0) {
                 if(subtitle != opts[this.context].trackSub) {
-					if (!opts[this.context].subtitles[subtitle]) {
-						delete opts[this.context].subtitles[subtitle];
-					} else {
-						if ((opts[this.context].subtitles[subtitle].t.match(new RegExp("<", "g")) || []).length == 2) {
-							if (!(opts[this.context].subtitles[subtitle].t.substr(0,1) == "<" && opts[this.context].subtitles[subtitle].t.slice(-1) == ">")) {
-								opts[this.context].subtitles[subtitle].t = opts[this.context].subtitles[subtitle].t.replace(/<\/?[^>]+(>|$)/g, "");
-							}
-						} else if ((opts[this.context].subtitles[subtitle].t.match(new RegExp("<", "g")) || []).length > 2) {
-							opts[this.context].subtitles[subtitle].t = opts[this.context].subtitles[subtitle].t.replace(/<\/?[^>]+(>|$)/g, "");
-						}
-						this.find(".wcp-subtitle-text").html(nl2br(opts[this.context].subtitles[subtitle].t));
-						opts[this.context].trackSub = subtitle;
-					}
+                    if (!opts[this.context].subtitles[subtitle]) {
+                        delete opts[this.context].subtitles[subtitle];
+                    } else {
+                        if ((opts[this.context].subtitles[subtitle].t.match(new RegExp("<", "g")) || []).length == 2) {
+                            if (!(opts[this.context].subtitles[subtitle].t.substr(0,1) == "<" && opts[this.context].subtitles[subtitle].t.slice(-1) == ">")) {
+                                opts[this.context].subtitles[subtitle].t = opts[this.context].subtitles[subtitle].t.replace(/<\/?[^>]+(>|$)/g, "");
+                            }
+                        } else if ((opts[this.context].subtitles[subtitle].t.match(new RegExp("<", "g")) || []).length > 2) {
+                            opts[this.context].subtitles[subtitle].t = opts[this.context].subtitles[subtitle].t.replace(/<\/?[^>]+(>|$)/g, "");
+                        }
+                        this.find(".wcp-subtitle-text").html(nl2br(opts[this.context].subtitles[subtitle].t));
+                        opts[this.context].trackSub = subtitle;
+                    }
                 } else if (opts[this.context].subtitles[subtitle].o < nowSecond) {
                     this.find(".wcp-subtitle-text").empty();
                 }
@@ -2291,6 +2291,15 @@ function printPlaylist() {
     
                 if (plstring != this.itemDesc(oi).title) vlc.playlist.items[oi].title = "[custom]"+plstring;
             }
+            
+            var itemDesc = this.itemDesc(oi);
+            
+            if (itemDesc.title.startsWith('[custom]')) {
+                var itemTitle = itemDesc.title.replace('[custom]','');
+            } else {
+                var itemTitle = itemDesc.title;
+            }
+            
             generatePlaylist += '<li class="wcp-menu-item wcp-playlist-item';
             if (window.playerApi.tempSel > -1) {
                 if (oi == window.playerApi.tempSel) generatePlaylist += ' wcp-menu-selected';
@@ -2301,7 +2310,7 @@ function printPlaylist() {
                 else if (window.playerApi.waitForNext && oi == window.playerApi.tempSel) generatePlaylist += ' wcp-menu-selected';
             }
             if (this.itemDesc(oi).disabled) generatePlaylist += ' wcp-disabled';
-            generatePlaylist += ' hmi-1"><img class="wcp-disabler-img" src="'+relbase+'/images/dragger.png" width="6" height="30"><div class="wcp-disabler-hold"><div class="wcp-disabler"><div class="wcp-disabler-dot"></div></div></div>'+this.itemDesc(oi).title+'</li>';
+            generatePlaylist += ' hmi-1"><img class="wcp-disabler-img" src="'+relbase+'/images/dragger.png" width="6" height="30"><div class="wcp-disabler-hold"><div class="wcp-disabler"><div class="wcp-disabler-dot"></div></div></div>' + itemTitle + '</li>';
         }
         playlistItems.css('overflowY', 'scroll');
         playlistItems.empty();
@@ -2847,8 +2856,8 @@ function processSub(srt,extension) {
     opts[this.context].subtitles = [];
     var self = this;
     window.subtitles.processSub(srt, extension, function(parsedSub) {
-		opts[self.context].subtitles = parsedSub;
-	});
+        opts[self.context].subtitles = parsedSub;
+    });
     opts[this.context].trackSub = -1;
 }
 
