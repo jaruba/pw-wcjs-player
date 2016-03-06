@@ -2943,7 +2943,7 @@ function attachHotkeys() {
                     wjsPlayer.audioTrack(1);
                 }
             }
-            wjsPlayer.notify( window.i18n('Audio') + ':' + wjsPlayer.audioDesc(wjsPlayer.audioTrack()));
+            wjsPlayer.notify( window.i18n('Audio') + ': ' + wjsPlayer.audioDesc(wjsPlayer.audioTrack()));
         }
     }).on('shift + up',function(e) {
         if (shouldHotkey(e)) {
