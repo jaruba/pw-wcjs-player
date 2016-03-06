@@ -2929,7 +2929,23 @@ function attachHotkeys() {
             }
         }
     });
-    dispatcher.on('shift + up',function(e) {
+    dispatcher.on('b',function(e) {
+        if (shouldHotkey(e)) {
+            wjsPlayer = players[wjsContext];
+            if (wjsPlayer.audioCount() > 2) {
+                if (wjsPlayer.audioTrack() < wjsPlayer.audioCount() - 1) {
+                    wjsPlayer.audioTrack( wjsPlayer.audioTrack()  + 1 );
+                } else {
+                    wjsPlayer.audioTrack(1);
+                }
+            } else {
+                if (wjsPlayer.audioTrack() != 1) {
+                    wjsPlayer.audioTrack(1);
+                }
+            }
+            wjsPlayer.notify( window.i18n('Audio') + ':' + wjsPlayer.audioDesc(wjsPlayer.audioTrack()));
+        }
+    }).on('shift + up',function(e) {
         if (shouldHotkey(e)) {
             var subPos = parseInt($(".wcp-subtitle-text").css("bottom"));
             if (subPos < 200) $(".wcp-subtitle-text").css("bottom",(subPos+5)+"px");
