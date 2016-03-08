@@ -2426,13 +2426,15 @@ function printSubtitles() {
     generatePlaylist += '<li class="wcp-menu-item wcp-subtitles-item';
     if (opts[this.context].currentSub == 0) generatePlaylist += ' wcp-menu-selected';
     generatePlaylist += ' hmi-2 i18n">' + window.i18n('None') + '</li>';
-    if (this.vlc.subtitles.count > 0) {
-        for (oi = 1; oi < this.vlc.subtitles.count; oi++) {
-            generatePlaylist += '<li class="wcp-menu-item wcp-subtitles-item';
-            if (oi == opts[this.context].currentSub) generatePlaylist += ' wcp-menu-selected';
-            generatePlaylist += ' hmi-2">'+this.vlc.subtitles[oi]+'</li>';
-        }
-    } else oi = 1;
+	if (!window.dlna.instance.initiated) {
+		if (this.vlc.subtitles.count > 0) {
+			for (oi = 1; oi < this.vlc.subtitles.count; oi++) {
+				generatePlaylist += '<li class="wcp-menu-item wcp-subtitles-item';
+				if (oi == opts[this.context].currentSub) generatePlaylist += ' wcp-menu-selected';
+				generatePlaylist += ' hmi-2">'+this.vlc.subtitles[oi]+'</li>';
+			}
+		} else oi = 1;
+	} else oi = 1;
 
     itemSetting = this.itemDesc(this.currentItem()).setting;
     
@@ -2447,7 +2449,7 @@ function printSubtitles() {
             }
             generatePlaylist += '<li class="wcp-menu-item wcp-subtitles-item'+hid;
             if (oi == opts[this.context].currentSub) generatePlaylist += ' wcp-menu-selected';
-            generatePlaylist += ' hmi-2">'+k+'</li>';
+            generatePlaylist += ' hmi-2" suburl="' + target[k].url + '">'+k+'</li>';
             oi++;
         }
     }
@@ -2467,42 +2469,49 @@ function printSubtitles() {
     
     this.find(".wcp-subtitles-item").click(function() {
         wjsPlayer = getContext(this);
-        if ($(this).index() == 0) {
-            wjsPlayer.vlc.subtitles.track = 0;
-            clearSubtitles.call(wjsPlayer);
-            wjsPlayer.notify(window.i18n("Subtitle Unloaded"));
-            window.localStorage.subLang = window.i18n("None");
-            window.playerApi.cache.lastSubtitle = 0;
-        } else if ($(this).index() < wjsPlayer.vlc.subtitles.count) {
-            wjsPlayer.find(".wcp-subtitle-text").empty();
-            opts[wjsPlayer.context].subtitles = [];
-            wjsPlayer.vlc.subtitles.track = $(this).index();
-            wjsPlayer.notify(window.i18n("Subtitle") + ": "+wjsPlayer.subDesc($(this).index()).language);
-            window.playerApi.cache.lastSubtitle = wjsPlayer.vlc.subtitles.track;
-            window.playerApi.cache.lastSubName = wjsPlayer.vlc.subtitles[wjsPlayer.vlc.subtitles.track];
-        } else {
-            window.playerApi.cache.lastSubtitle = 0;
-            wjsPlayer.find(".wcp-subtitle-text").empty();
-            opts[wjsPlayer.context].subtitles = [];
-            if (wjsPlayer.vlc.subtitles.track > 0) wjsPlayer.vlc.subtitles.track = 0;
-            newSub = $(this).index() - wjsPlayer.vlc.subtitles.count;
-            if (wjsPlayer.vlc.subtitles.count) newSub++;
-            itemSubtitles = itemSetting.subtitles;
-            for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
-                newSub--;
-                if (newSub == 0) {
-                    loadSubtitle.call(wjsPlayer,itemSubtitles[k]);
-                    wjsPlayer.notify(window.i18n("Subtitle") + ": "+k.replace('[hid]',''));
-                    if (itemSubtitles[k].indexOf("http://dl.opensubtitles.org/") == 0) if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
-                    else window.localStorage.subLang = k;
-                    break;
-                }
-            }
-        }
-        wjsPlayer.find(".wcp-subtitles").hide(0);
-        if ($(this).index() == -1) opts[wjsPlayer.context].currentSub = 0;
-        else opts[wjsPlayer.context].currentSub = $(this).index();
-        opts[wjsPlayer.context].subDelay = 0;
+		if (window.dlna.instance.initiated) {
+			wjsPlayer.find(".wcp-subtitles").hide(0);
+			window.dlna.castData.castingPaused = 1;
+			window.dlna.play(parseInt(window.dlna.instance.lastIndex), { lastPos: window.dlna.instance.lastPos, savedSub: $(this).attr('suburl') });
+			opts[wjsPlayer.context].currentSub = $(this).index();
+		} else {
+			if ($(this).index() == 0) {
+				wjsPlayer.vlc.subtitles.track = 0;
+				clearSubtitles.call(wjsPlayer);
+				wjsPlayer.notify(window.i18n("Subtitle Unloaded"));
+				window.localStorage.subLang = window.i18n("None");
+				window.playerApi.cache.lastSubtitle = 0;
+			} else if ($(this).index() < wjsPlayer.vlc.subtitles.count) {
+				wjsPlayer.find(".wcp-subtitle-text").empty();
+				opts[wjsPlayer.context].subtitles = [];
+				wjsPlayer.vlc.subtitles.track = $(this).index();
+				wjsPlayer.notify(window.i18n("Subtitle") + ": "+wjsPlayer.subDesc($(this).index()).language);
+				window.playerApi.cache.lastSubtitle = wjsPlayer.vlc.subtitles.track;
+				window.playerApi.cache.lastSubName = wjsPlayer.vlc.subtitles[wjsPlayer.vlc.subtitles.track];
+			} else {
+				window.playerApi.cache.lastSubtitle = 0;
+				wjsPlayer.find(".wcp-subtitle-text").empty();
+				opts[wjsPlayer.context].subtitles = [];
+				if (wjsPlayer.vlc.subtitles.track > 0) wjsPlayer.vlc.subtitles.track = 0;
+				newSub = $(this).index() - wjsPlayer.vlc.subtitles.count;
+				if (wjsPlayer.vlc.subtitles.count) newSub++;
+				itemSubtitles = itemSetting.subtitles;
+				for (var k in itemSubtitles) if (itemSubtitles.hasOwnProperty(k)) {
+					newSub--;
+					if (newSub == 0) {
+						loadSubtitle.call(wjsPlayer,itemSubtitles[k]);
+						wjsPlayer.notify(window.i18n("Subtitle") + ": "+k.replace('[hid]',''));
+						if (itemSubtitles[k].indexOf("http://dl.opensubtitles.org/") == 0) if (k.indexOf(" ") > -1) window.localStorage.subLang = k.split(" ")[0];
+						else window.localStorage.subLang = k;
+						break;
+					}
+				}
+			}
+			wjsPlayer.find(".wcp-subtitles").hide(0);
+			if ($(this).index() == -1) opts[wjsPlayer.context].currentSub = 0;
+			else opts[wjsPlayer.context].currentSub = $(this).index();
+			opts[wjsPlayer.context].subDelay = 0;
+		}
     });
     if ($('.wcp-show-subtitles').html() == window.i18n('Less Subtitles')) {
         $('.wcp-subtitles-hidden').show(0);
